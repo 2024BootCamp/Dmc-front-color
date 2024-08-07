@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'home_page.dart';
+import '../Screens/home_page.dart';
 import 'health_page.dart';
 import 'food_log_page.dart';
-import 'report_page.dart';
+import '../Screens/report_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -35,9 +35,11 @@ class _MainPageState extends State<MainPage> {
         //배경색을 Color.fromARGB(178, 16, 19, 19)로 하고 아이콘을 흰색으로 하고싶었는데 잘 안됨
         backgroundColor: Colors.white, // 네비게이션 바 배경색 (기본 흰색)
         selectedItemColor: const Color.fromARGB(178, 16, 19, 19), // 선택된 아이템 색상
-        unselectedItemColor: const Color.fromARGB(163, 24, 26, 27), // 선택되지 않은 아이템 색상
+        unselectedItemColor:
+            const Color.fromARGB(163, 24, 26, 27), // 선택되지 않은 아이템 색상
         selectedLabelStyle: const TextStyle(
-            color: Color.fromARGB(255, 236, 76, 132), fontWeight: FontWeight.bold), // 선택된 라벨 스타일
+            color: Color.fromARGB(255, 236, 76, 132),
+            fontWeight: FontWeight.bold), // 선택된 라벨 스타일
         unselectedLabelStyle: const TextStyle(
             color: Color.fromARGB(255, 98, 188, 218)), // 선택되지 않은 라벨 스타일
         items: const [

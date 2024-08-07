@@ -22,16 +22,19 @@ class _SignupPage2State extends State<SignupPage2> {
       appBar: AppBar(
         // 뒤로가기 버튼
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white), // 아이콘 색상 흰색으로 설정
+          icon: const Icon(Icons.arrow_back,
+              color: Colors.white), // 아이콘 색상 흰색으로 설정
           onPressed: () {
             Navigator.pop(context);
           },
         ),
         title: const Text(
           '회원가입',
-          style: TextStyle(color: Colors.white, fontFamily: 'Quicksand'), // 제목 글자 색상 흰색으로 설정
+          style: TextStyle(
+              color: Colors.white, fontFamily: 'Quicksand'), // 제목 글자 색상 흰색으로 설정
         ),
-        backgroundColor: const Color.fromARGB(255, 173, 216, 230), // AppBar 배경색 설정
+        backgroundColor:
+            const Color.fromARGB(255, 173, 216, 230), // AppBar 배경색 설정
       ),
       body: Container(
         color: Colors.white, // 전체 화면 배경색을 흰색으로 설정
@@ -69,7 +72,7 @@ class _SignupPage2State extends State<SignupPage2> {
                         _selectedConditions[idx] = selected;
                         if (selected) {
                           _selectedConditions[2] =
-                          false; // 다른 선택 시 '해당 사항 없음' 해제
+                              false; // 다른 선택 시 '해당 사항 없음' 해제
                         }
                       }
                     });
@@ -134,13 +137,16 @@ class _SignupPage2State extends State<SignupPage2> {
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(builder: (context) => LoginPage()),
-                        (route) => false,
+                    (route) => false,
                   );
                 },
                 child: const Text('기록하기',
-                    style: TextStyle(fontFamily: 'Quicksand', color: Colors.white)), // 버튼 텍스트 색상 흰색으로 설정
+                    style: TextStyle(
+                        fontFamily: 'Quicksand',
+                        color: Colors.white)), // 버튼 텍스트 색상 흰색으로 설정
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 173, 216, 230), // 버튼 배경색을 요청하신 색상으로 설정
+                  backgroundColor: const Color.fromARGB(
+                      255, 173, 216, 230), // 버튼 배경색을 요청하신 색상으로 설정
                 ),
               ),
             ),

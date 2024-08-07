@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'login_page.dart';
+import '../Screens/login_page.dart';
 
 // 메인 함수, 애플리케이션 진입점
 void main() async {
@@ -18,7 +18,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Your App Title', // 앱 제목 설정 (선택 사항)
-      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         // BottomNavigationBar의 테마 설정

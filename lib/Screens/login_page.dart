@@ -1,25 +1,48 @@
 import 'package:flutter/material.dart';
-import 'signup_page1.dart';
+import 'AuthService.dart'; // Import your AuthService
 import 'main_page.dart';
+import 'signup_page1.dart';
 
 class LoginPage extends StatelessWidget {
-  // 사용자명과 비밀번호 입력 필드 컨트롤러
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  final AuthService _authService =
+      AuthService('http://192.168.56.1:8081'); // Your base URL
+
   LoginPage({super.key});
+
+  Future<void> _login(BuildContext context) async {
+    final username = _usernameController.text;
+    final password = _passwordController.text;
+
+    final success = await _authService.login(username, password);
+
+    if (success) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => MainPage()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Login failed. Please check your credentials.'),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 173, 216, 230), // 배경 색상 설정
+      backgroundColor: const Color.fromARGB(255, 173, 216, 230),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset('assets/dmc_logo.png', height: 100), // DMC 로고 이미지
+              Image.asset('assets/dmc_logo.png', height: 100),
               const SizedBox(height: 16),
               const Text(
                 'DMC',
@@ -31,7 +54,6 @@ class LoginPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 32),
-              // 사용자명 입력 필드
               TextField(
                 controller: _usernameController,
                 decoration: InputDecoration(
@@ -52,7 +74,6 @@ class LoginPage extends StatelessWidget {
                     color: Colors.white, fontFamily: 'Quicksand'),
               ),
               const SizedBox(height: 16),
-              // 비밀번호 입력 필드
               TextField(
                 controller: _passwordController,
                 decoration: InputDecoration(
@@ -74,14 +95,8 @@ class LoginPage extends StatelessWidget {
                 obscureText: true,
               ),
               const SizedBox(height: 32),
-              // 로그인 버튼
               ElevatedButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const MainPage()),
-                  );
-                },
+                onPressed: () => _login(context),
                 style: ElevatedButton.styleFrom(
                   foregroundColor: const Color.fromARGB(255, 211, 211, 211),
                   backgroundColor: Colors.white,
@@ -101,7 +116,6 @@ class LoginPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              // 회원가입 버튼
               TextButton(
                 onPressed: () {
                   Navigator.push(

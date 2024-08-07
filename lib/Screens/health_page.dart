@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'calendar_page.dart';
-import 'profile_page.dart';
+import '../Screens/profile_page.dart';
 
 class HealthPage extends StatefulWidget {
   const HealthPage({super.key});
@@ -13,7 +13,7 @@ class HealthPage extends StatefulWidget {
 
 class _HealthPageState extends State<HealthPage> {
   String _selectedDate =
-  DateFormat('yyyy-MM-dd').format(DateTime.now()); // 선택된 날짜
+      DateFormat('yyyy-MM-dd').format(DateTime.now()); // 선택된 날짜
   final Map<String, Map<String, dynamic>> _healthData = {
     '혈압': {
       'high': 0,
@@ -51,9 +51,9 @@ class _HealthPageState extends State<HealthPage> {
   // 혈압 입력 다이얼로그 표시
   void _showBloodPressureDialog(BuildContext context) {
     final TextEditingController bloodPressureHighController =
-    TextEditingController();
+        TextEditingController();
     final TextEditingController bloodPressureLowController =
-    TextEditingController();
+        TextEditingController();
 
     showDialog(
       context: context,
@@ -87,14 +87,14 @@ class _HealthPageState extends State<HealthPage> {
           actions: [
             TextButton(
               child:
-              const Text('취소', style: TextStyle(fontFamily: 'Quicksand')),
+                  const Text('취소', style: TextStyle(fontFamily: 'Quicksand')),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
               child:
-              const Text('저장', style: TextStyle(fontFamily: 'Quicksand')),
+                  const Text('저장', style: TextStyle(fontFamily: 'Quicksand')),
               onPressed: () {
                 setState(() {
                   _healthData['혈압']!['high'] =
@@ -119,9 +119,9 @@ class _HealthPageState extends State<HealthPage> {
   // 혈당 입력 다이얼로그 표시
   void _showBloodSugarDialog(BuildContext context) {
     final TextEditingController bloodSugarFastingController =
-    TextEditingController();
+        TextEditingController();
     final TextEditingController bloodSugarPostMealController =
-    TextEditingController();
+        TextEditingController();
 
     showDialog(
       context: context,
@@ -155,14 +155,14 @@ class _HealthPageState extends State<HealthPage> {
           actions: [
             TextButton(
               child:
-              const Text('취소', style: TextStyle(fontFamily: 'Quicksand')),
+                  const Text('취소', style: TextStyle(fontFamily: 'Quicksand')),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
               child:
-              const Text('저장', style: TextStyle(fontFamily: 'Quicksand')),
+                  const Text('저장', style: TextStyle(fontFamily: 'Quicksand')),
               onPressed: () {
                 setState(() {
                   _healthData['혈당']!['fasting'] =
@@ -210,14 +210,14 @@ class _HealthPageState extends State<HealthPage> {
           actions: [
             TextButton(
               child:
-              const Text('취소', style: TextStyle(fontFamily: 'Quicksand')),
+                  const Text('취소', style: TextStyle(fontFamily: 'Quicksand')),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
               child:
-              const Text('저장', style: TextStyle(fontFamily: 'Quicksand')),
+                  const Text('저장', style: TextStyle(fontFamily: 'Quicksand')),
               onPressed: () {
                 setState(() {
                   _healthData['체중']!['value'] =
@@ -258,7 +258,7 @@ class _HealthPageState extends State<HealthPage> {
     final String formattedDate = DateFormat('yyyy년 MM월 dd일 (E)', 'ko_KR')
         .format(DateTime.now()); // 날짜 포맷팅
     final String formattedTime =
-    DateFormat('HH:mm').format(DateTime.now()); // 시간 포맷팅
+        DateFormat('HH:mm').format(DateTime.now()); // 시간 포맷팅
 
     return Scaffold(
       backgroundColor: Colors.white, // 배경색을 흰색으로 설정
@@ -269,7 +269,7 @@ class _HealthPageState extends State<HealthPage> {
         backgroundColor: const Color.fromARGB(255, 173, 216, 230),
         actions: [
           IconButton(
-            icon: Icon(Icons.calendar_today, color: Colors.white),//아이콘 색상 변경
+            icon: Icon(Icons.calendar_today, color: Colors.white), //아이콘 색상 변경
             onPressed: () {
               Navigator.push(
                 context,
@@ -344,17 +344,17 @@ class _HealthPageState extends State<HealthPage> {
                           LineSeries<BloodPressureData, String>(
                             dataSource: _getSortedBloodPressureData(),
                             xValueMapper: (BloodPressureData data, _) =>
-                            data.date,
+                                data.date,
                             yValueMapper: (BloodPressureData data, _) =>
-                            data.high,
+                                data.high,
                             name: '최고',
                           ),
                           LineSeries<BloodPressureData, String>(
                             dataSource: _getSortedBloodPressureData(),
                             xValueMapper: (BloodPressureData data, _) =>
-                            data.date,
+                                data.date,
                             yValueMapper: (BloodPressureData data, _) =>
-                            data.low,
+                                data.low,
                             name: '최저',
                           ),
                         ],
@@ -426,7 +426,7 @@ class _HealthPageState extends State<HealthPage> {
                                     .cast<BloodSugarData>()),
                             xValueMapper: (BloodSugarData data, _) => data.date,
                             yValueMapper: (BloodSugarData data, _) =>
-                            data.value,
+                                data.value,
                             name: '공복',
                           ),
                           LineSeries<BloodSugarData, String>(
@@ -435,7 +435,7 @@ class _HealthPageState extends State<HealthPage> {
                                     .cast<BloodSugarData>()),
                             xValueMapper: (BloodSugarData data, _) => data.date,
                             yValueMapper: (BloodSugarData data, _) =>
-                            data.value,
+                                data.value,
                             name: '식후',
                           ),
                         ],

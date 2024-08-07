@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'calendar_page.dart';
+import '../Screens/calendar_page.dart';
 import 'profile_page.dart';
+
 //음식 추천 페이지
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -103,7 +104,8 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: const Color.fromARGB(255, 173, 216, 230),
         actions: [
           IconButton(
-            icon: Icon(Icons.calendar_today, color: Colors.white),//캐린더 아이콘 흰색으로 바꿈
+            icon: Icon(Icons.calendar_today,
+                color: Colors.white), //캐린더 아이콘 흰색으로 바꿈
             onPressed: () {
               Navigator.push(
                 context,
@@ -113,7 +115,7 @@ class _HomePageState extends State<HomePage> {
             },
           ),
           IconButton(
-            icon: Icon(Icons.account_circle, color: Colors.white),//프로필 아이콘 흰색
+            icon: Icon(Icons.account_circle, color: Colors.white), //프로필 아이콘 흰색
             onPressed: () {
               Navigator.push(
                 context,
@@ -149,7 +151,7 @@ class _HomePageState extends State<HomePage> {
                       onPressed: () => _selectDate(context),
                       style: ElevatedButton.styleFrom(
                         backgroundColor:
-                        const Color.fromARGB(255, 173, 216, 230),
+                            const Color.fromARGB(255, 173, 216, 230),
                       ),
                       child: const Text(
                         '날짜 선택',

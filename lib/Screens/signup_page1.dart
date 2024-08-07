@@ -21,9 +21,24 @@ class _SignupPage1State extends State<SignupPage1> {
   final TextEditingController _locationController =
       TextEditingController(); // 지역 필드 컨트롤러
 
-  // 성별 선택 변수
-  String? _selectedGender;
-  bool _passwordsMatch = false; // 비밀번호 일치 여부
+  bool _passwordsMatch = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // 비밀번호와 비밀번호 재입력 필드에 리스너 추가
+    _passwordController.addListener(_checkPasswordsMatch);
+    _passwordConfirmController.addListener(_checkPasswordsMatch);
+  }
+
+  @override
+  void dispose() {
+    // 컨트롤러를 dispose하여 메모리 누수 방지
+    _passwordController.dispose();
+    _passwordConfirmController.dispose();
+    super.dispose();
+  }
 
   void _checkPasswordsMatch() {
     setState(() {
@@ -31,6 +46,9 @@ class _SignupPage1State extends State<SignupPage1> {
           _passwordController.text == _passwordConfirmController.text;
     });
   }
+
+  // 성별 선택 변수
+  String? _selectedGender;
 
   @override
   Widget build(BuildContext context) {
@@ -55,18 +73,6 @@ class _SignupPage1State extends State<SignupPage1> {
             icon: const Icon(Icons.arrow_forward,
                 color: Colors.white), // 아이콘 색상 흰색으로 설정
             onPressed: () {
-              if (_selectedGender == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('성별을 선택하세요.')),
-                );
-                return;
-              }
-              if (!_passwordsMatch) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('비밀번호가 일치하지 않습니다.')),
-                );
-                return;
-              }
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const SignupPage2()),
@@ -90,8 +96,7 @@ class _SignupPage1State extends State<SignupPage1> {
             // 비밀번호 재입력 필드
             buildTextField(
                 "비밀번호 재입력", "비밀번호 재입력", _passwordConfirmController, true,
-                obscureText: true, onChanged: _checkPasswordsMatch),
-            // 비밀번호 일치 여부 아이콘
+                obscureText: true),
             if (_passwordController.text.isNotEmpty &&
                 _passwordConfirmController.text.isNotEmpty)
               Row(
@@ -103,7 +108,7 @@ class _SignupPage1State extends State<SignupPage1> {
                   ),
                 ],
               ),
-            // 닉네임 입력 필드
+            //닉네임 입력 필드 (추가)
             buildTextField("유저 네임", "유저 네임 입력(필수)", _nameController, false),
             // 휴대폰 번호 입력 필드
             buildTextField("휴대폰 번호", "010 0000 0000", _phoneController, false),
@@ -117,18 +122,6 @@ class _SignupPage1State extends State<SignupPage1> {
             // 다음 버튼
             ElevatedButton(
               onPressed: () {
-                if (_selectedGender == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('성별을 선택하세요.')),
-                  );
-                  return;
-                }
-                if (!_passwordsMatch) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('비밀번호가 일치하지 않습니다.')),
-                  );
-                  return;
-                }
                 // 다음 페이지로 이동
                 Navigator.push(
                   context,
@@ -136,8 +129,8 @@ class _SignupPage1State extends State<SignupPage1> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(
-                    255, 173, 216, 230), // 버튼 배경색을 요청하신 색상으로 설정
+                backgroundColor:
+                    const Color.fromARGB(255, 173, 216, 230), //버튼 배경 색
                 foregroundColor: Colors.white, // 버튼 텍스트 색상을 흰색으로 설정
                 padding: const EdgeInsets.symmetric(vertical: 16.0), // 버튼 패딩 조정
                 shape: RoundedRectangleBorder(
@@ -216,7 +209,7 @@ class _SignupPage1State extends State<SignupPage1> {
   // 텍스트 필드 빌드 함수
   Widget buildTextField(String label, String placeholder,
       TextEditingController controller, bool isRequired,
-      {bool obscureText = false, Function()? onChanged}) {
+      {bool obscureText = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -251,11 +244,6 @@ class _SignupPage1State extends State<SignupPage1> {
           ),
           obscureText: obscureText,
           style: const TextStyle(fontFamily: 'Quicksand'),
-          onChanged: (text) {
-            if (onChanged != null) {
-              onChanged();
-            }
-          },
         ),
         const SizedBox(height: 16),
       ],

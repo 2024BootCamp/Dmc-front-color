@@ -4,8 +4,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'calendar_page.dart';
-import 'profile_page.dart';
-import 'report_page.dart';
+import '../Screens/profile_page.dart';
+import '../Screens/report_page.dart';
 
 class FoodLogPage extends StatefulWidget {
   const FoodLogPage({super.key});
@@ -159,7 +159,8 @@ class FoodLogPageState extends State<FoodLogPage> {
               );
             },
           ),
-          IconButton(//profile
+          IconButton(
+            //profile
             icon: Icon(Icons.account_circle, color: Colors.white), // 아이콘 색상 변경
             onPressed: () {
               Navigator.push(
@@ -252,7 +253,7 @@ class FoodLogPageState extends State<FoodLogPage> {
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,
                     backgroundColor:
-                    Color.fromARGB(255, 173, 216, 230), // 버튼 텍스트 색상
+                        Color.fromARGB(255, 173, 216, 230), // 버튼 텍스트 색상
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -263,7 +264,7 @@ class FoodLogPageState extends State<FoodLogPage> {
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,
                     backgroundColor:
-                    Color.fromARGB(255, 173, 216, 230), // 버튼 텍스트 색상
+                        Color.fromARGB(255, 173, 216, 230), // 버튼 텍스트 색상
                   ),
                 ),
               ],
@@ -277,8 +278,7 @@ class FoodLogPageState extends State<FoodLogPage> {
                   style: const TextStyle(fontFamily: 'Quicksand')),
               style: ElevatedButton.styleFrom(
                 foregroundColor: Color.fromARGB(255, 102, 102, 102),
-                backgroundColor:
-                Color.fromARGB(255, 240, 240, 240), // 버튼 배경색
+                backgroundColor: Color.fromARGB(255, 240, 240, 240), // 버튼 배경색
               ),
             ),
             const SizedBox(height: 16),
@@ -304,11 +304,11 @@ class FoodLogPageState extends State<FoodLogPage> {
                             Text(
                                 '코멘트: ${item['comment']} (그램: ${item['grams']})',
                                 style:
-                                const TextStyle(fontFamily: 'Quicksand')),
+                                    const TextStyle(fontFamily: 'Quicksand')),
                           if (item['comment'] == null)
                             Text('그램: ${item['grams']}',
                                 style:
-                                const TextStyle(fontFamily: 'Quicksand')),
+                                    const TextStyle(fontFamily: 'Quicksand')),
                         ],
                       ),
                       trailing: Row(
