@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../Screens/calendar_page.dart';
+import 'meal_service.dart'; // import meal_service.dart 추가
 import 'profile_page.dart';
+import '../Screens/calendar_page.dart';
 
-//음식 추천 페이지
+// 음식 추천 페이지
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -13,56 +14,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   DateTime _selectedDate = DateTime.now(); // 선택된 날짜를 저장
-  final Map<String, List<Map<String, String>>> _mealData = {
-    // 샘플 식단 데이터
-    '2024-07-31': [
-      {
-        'calories': '1,709kcal',
-        'sugar': '15g',
-        'salt': '2g',
-        'meal': '밥, 김치, 달걀말이, 된장국',
-      },
-      {
-        'calories': '1,500kcal',
-        'sugar': '10g',
-        'salt': '1.5g',
-        'meal': '밥, 무생채, 불고기, 미역국',
-      },
-      {
-        'calories': '1,600kcal',
-        'sugar': '18g',
-        'salt': '2.2g',
-        'meal': '밥, 생채, 참치캔, 김치찌개',
-      },
-      {
-        'calories': '1,400kcal',
-        'sugar': '12g',
-        'salt': '1.8g',
-        'meal': '밥, 멸치볶음, 계란후라이, 콩나물국',
-      },
-      {
-        'calories': '1,550kcal',
-        'sugar': '14g',
-        'salt': '2.1g',
-        'meal': '밥, 가지볶음, 두부김치, 순두부찌개',
-      },
-    ],
-    '2024-08-01': [
-      {
-        'calories': '1,800kcal',
-        'sugar': '20g',
-        'salt': '2.5g',
-        'meal': '밥, 샐러드, 치킨스테이크, 콩나물국',
-      },
-      {
-        'calories': '1,750kcal',
-        'sugar': '18g',
-        'salt': '2g',
-        'meal': '밥, 나물, 생선구이, 무국',
-      },
-    ],
-    // 더 많은 데이터 추가 가능
-  };
+  List<Map<String, String>> _meals = []; // 식단 데이터 저장
 
   // 날짜 선택 함수
   Future<void> _selectDate(BuildContext context) async {
@@ -76,22 +28,24 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _selectedDate = picked; // 선택된 날짜 설정
       });
+      _fetchMeals(); // 날짜 선택 후 식단 데이터 새로고침
     }
   }
 
-  // 식단 데이터 새로고침 함수
-  Future<void> _refreshMeals() async {
-    // 여기에 새로고침 시 데이터를 다시 불러오는 로직을 추가할 수 있습니다.
-    setState(() {
-      // 데이터 새로고침 로직
-    });
+  // 식단 데이터 가져오기 함수
+  Future<void> _fetchMeals() async {
+    try {
+      List<Map<String, String>> meals = await fetchMealsByDate(_selectedDate);
+      setState(() {
+        _meals = meals;
+      });
+    } catch (e) {
+      print('Error fetching meals: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    String formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
-    List<Map<String, String>> meals = _mealData[formattedDate] ?? [];
-
     return Scaffold(
       backgroundColor: Colors.white, // 배경색을 흰색으로 설정
       appBar: AppBar(
@@ -105,7 +59,7 @@ class _HomePageState extends State<HomePage> {
         actions: [
           IconButton(
             icon: Icon(Icons.calendar_today,
-                color: Colors.white), //캐린더 아이콘 흰색으로 바꿈
+                color: Colors.white), // 캘린더 아이콘 흰색으로 바꿈
             onPressed: () {
               Navigator.push(
                 context,
@@ -115,7 +69,7 @@ class _HomePageState extends State<HomePage> {
             },
           ),
           IconButton(
-            icon: Icon(Icons.account_circle, color: Colors.white), //프로필 아이콘 흰색
+            icon: Icon(Icons.account_circle, color: Colors.white), // 프로필 아이콘 흰색
             onPressed: () {
               Navigator.push(
                 context,
@@ -127,7 +81,7 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: _refreshMeals,
+        onRefresh: _fetchMeals, // 새로 고침 시 식단 데이터 새로 가져오기
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Padding(
@@ -151,7 +105,7 @@ class _HomePageState extends State<HomePage> {
                       onPressed: () => _selectDate(context),
                       style: ElevatedButton.styleFrom(
                         backgroundColor:
-                            const Color.fromARGB(255, 173, 216, 230),
+                        const Color.fromARGB(255, 173, 216, 230),
                       ),
                       child: const Text(
                         '날짜 선택',
@@ -164,8 +118,25 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
                 const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () async {
+                    await fetchRecommendedMeals(); // 추천 버튼 클릭 시 추천 식단 가져오기
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                    const Color.fromARGB(255, 173, 216, 230),
+                  ),
+                  child: const Text(
+                    '추천 식단',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: 'Quicksand',
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 // 식단 정보
-                ...meals.map((meal) {
+                ..._meals.map((meal) {
                   return buildMealCard(
                     meal['meal'] ?? '',
                     meal['calories'] ?? '',

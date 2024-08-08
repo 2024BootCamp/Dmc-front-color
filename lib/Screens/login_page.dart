@@ -8,7 +8,7 @@ class LoginPage extends StatelessWidget {
   final TextEditingController _passwordController = TextEditingController();
 
   final AuthService _authService =
-      AuthService('http://192.168.56.1:8081'); // Your base URL
+      AuthService('http://192.168.0.1:8081'); // Your base URL
 
   LoginPage({super.key});
 
