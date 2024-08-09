@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'meal_service.dart'; // import meal_service.dart 추가
+import '../Services/meal_service.dart'; // import meal_service.dart 추가
 import 'profile_page.dart';
 import '../Screens/calendar_page.dart';
 
@@ -14,7 +14,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   DateTime _selectedDate = DateTime.now(); // 선택된 날짜를 저장
-  List<List<Map<String, dynamic>>> _meals = []; // 식단 데이터 저장 (각 식단이 List<Map<String, dynamic>> 형태로 저장됨)
+  List<List<Map<String, dynamic>>> _meals =
+      []; // 식단 데이터 저장 (각 식단이 List<Map<String, dynamic>> 형태로 저장됨)
 
   @override
   void initState() {
@@ -41,7 +42,8 @@ class _HomePageState extends State<HomePage> {
   // 특정 날짜의 식단 데이터 가져오기 함수
   Future<void> _fetchMealsByDate() async {
     try {
-      List<List<Map<String, dynamic>>> meals = await fetchMealsByDate(_selectedDate);
+      List<List<Map<String, dynamic>>> meals =
+          await fetchMealsByDate(_selectedDate);
       setState(() {
         _meals = meals;
       });
@@ -72,7 +74,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   // 영양 정보를 기준에 따라 변환하는 함수
-  Map<String, double> calculateNutrient(Map<String, dynamic> meal, String type) {
+  Map<String, double> calculateNutrient(
+      Map<String, dynamic> meal, String type) {
     double multiplier = 1.0;
 
     switch (type) {
@@ -109,30 +112,27 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: const Color.fromARGB(255, 173, 216, 230),
         actions: [
           IconButton(
-            icon: Icon(Icons.calendar_today,
-                color: Colors.white), // 캘린더 아이콘 흰색으로 바꿈
+            icon: Icon(Icons.calendar_today, color: Colors.white),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (context) => const CalendarPage()), // 캘린더 페이지로 이동
+                MaterialPageRoute(builder: (context) => const CalendarPage()),
               );
             },
           ),
           IconButton(
-            icon: Icon(Icons.account_circle, color: Colors.white), // 프로필 아이콘 흰색
+            icon: Icon(Icons.account_circle, color: Colors.white),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (context) => const ProfilePage()), // 프로필 페이지로 이동
+                MaterialPageRoute(builder: (context) => const ProfilePage()),
               );
             },
           ),
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: _fetchMealsByDate, // 새로 고침 시 특정 날짜의 식단 데이터 새로 가져오기
+        onRefresh: _fetchMealsByDate,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Padding(
@@ -156,7 +156,7 @@ class _HomePageState extends State<HomePage> {
                       onPressed: () => _selectDate(context),
                       style: ElevatedButton.styleFrom(
                         backgroundColor:
-                        const Color.fromARGB(255, 173, 216, 230),
+                            const Color.fromARGB(255, 173, 216, 230),
                       ),
                       child: const Text(
                         '날짜 선택',
@@ -170,33 +170,27 @@ class _HomePageState extends State<HomePage> {
                 ),
                 const SizedBox(height: 16),
                 // 식단 정보
-                ..._meals.asMap().entries.map((entry) {
-                  int idx = entry.key;
-                  List<Map<String, dynamic>> mealList = entry.value;
-                  return Column(
-                    children: [
-                      buildMealCard(mealList),
-                      if (idx == _meals.length - 1) ...[
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: () async {
-                            await _fetchTodayMeal(); // 추천 버튼 클릭 시 오늘의 추천 식단 가져오기
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(255, 173, 216, 230),
-                          ),
-                          child: const Text(
-                            '오늘의 추천 식단',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'Quicksand',
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  );
-                }).toList(),
+                if (_meals.isNotEmpty)
+                  ..._meals.asMap().entries.map((entry) {
+                    return buildMealCard(entry.value);
+                  }).toList(),
+                // 추천 식단 버튼을 항상 보이도록 설정
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () async {
+                    await _fetchTodayMeal(); // 추천 버튼 클릭 시 오늘의 추천 식단 가져오기
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 173, 216, 230),
+                  ),
+                  child: const Text(
+                    '오늘의 추천 식단',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: 'Quicksand',
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -270,7 +264,8 @@ class _HomePageState extends State<HomePage> {
                     fontFamily: 'Quicksand',
                   ),
                 ),
-                if (idx < mealList.length - 1) const Divider(color: Colors.grey), // 각 음식 사이에 구분선 추가
+                if (idx < mealList.length - 1)
+                  const Divider(color: Colors.grey), // 각 음식 사이에 구분선 추가
               ],
             ),
           );

@@ -3,7 +3,7 @@ import 'package:flutter_application_1/Screens/login_page.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'AuthService.dart'; // AuthService를 import 합니다.
+import '../Services/AuthService.dart'; // AuthService를 import 합니다.
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -45,14 +45,15 @@ class _ProfilePageState extends State<ProfilePage> {
   // 로그아웃 함수
   Future<void> _logout() async {
     try {
-      final authService =
-          AuthService('http://192.168.56.1:8081/account/logout');
-      await AuthService.clearToken();
-      // 로그아웃 후 적절한 화면으로 리디렉션
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginPage()),
-      );
+      final success = AuthService().logout();
+      if (await success) {
+        await AuthService.clearToken();
+        // 로그아웃 후 적절한 화면으로 리디렉션
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginPage()),
+        );
+      }
     } catch (e) {
       // 오류 처리
       ScaffoldMessenger.of(context).showSnackBar(
@@ -144,14 +145,15 @@ class _ProfilePageState extends State<ProfilePage> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                    vertical: 20, horizontal: 32), // 버튼의 수직 및 수평 여백을 늘림
               ),
               child: const Text(
                 '로그아웃',
                 style: TextStyle(
                   color: Colors.white,
                   fontFamily: 'Quicksand',
-                  fontSize: 16,
+                  fontSize: 18, // 폰트 크기를 약간 늘림
                 ),
               ),
             ),

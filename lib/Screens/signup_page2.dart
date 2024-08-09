@@ -218,7 +218,7 @@ class _SignupPage2State extends State<SignupPage2> {
     final activityLevel = _activityLevel;
 
     final response = await http.post(
-      Uri.parse('http://192.168.0.1:8081/account/register'), // 회원가입 API 엔드포인트
+      Uri.parse('http://192.168.56.1:8081/account/register'), // 회원가입 API 엔드포인트
       headers: {
         'Content-Type': 'application/json',
       },

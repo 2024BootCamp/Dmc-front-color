@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'AuthService.dart'; // Import your AuthService
+import '../Services/AuthService.dart'; // Import your AuthService
 import 'main_page.dart';
 import 'signup_page1.dart';
 
@@ -7,8 +7,7 @@ class LoginPage extends StatelessWidget {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  final AuthService _authService =
-      AuthService('http://192.168.0.1:8081'); // Your base URL 제발 본인 컴퓨터에 맞게
+  final AuthService _authService = AuthService(); // Your base URL 제발 본인 컴퓨터에 맞게
 
   LoginPage({super.key});
 

@@ -4,9 +4,40 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../Model/SignupModel.dart';
 
 class AuthService {
-  final String baseUrl;
+  final String baseUrl = "http://192.168.56.1:8081";
 
-  AuthService(this.baseUrl);
+  AuthService();
+
+  Future<bool> logout() async {
+    try {
+      final String? token = await getToken();
+
+      if (token == null) {
+        print("No token found, user is already logged out.");
+        return false;
+      }
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/account/logout'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print("Logout successful");
+        await clearToken();
+        return true;
+      } else {
+        print("Logout failed with status: ${response.statusCode}");
+        return false;
+      }
+    } catch (e) {
+      print("Error during logout: $e");
+      return false;
+    }
+  }
 
   Future<bool> login(String username, String password) async {
     final response = await http.post(
@@ -79,6 +110,5 @@ class AuthService {
   static Future<void> clearToken() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('jwt_token');
-
   }
 }
