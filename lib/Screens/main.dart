@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'AuthService.dart'; // AuthService를 import합니다.
+import '../Services/AuthService.dart'; // AuthService를 import합니다.
 import '../Screens/login_page.dart';
 import '../Screens/home_page.dart';
 

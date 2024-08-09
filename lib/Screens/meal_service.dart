@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'AuthService.dart';
+import '../Services/AuthService.dart';
 
 // 오늘의 추천 식단 API 호출 함수
 Future<List<Map<String, dynamic>>> fetchRecommendedMealForToday() async {

@@ -3,7 +3,7 @@ import 'package:flutter_application_1/Screens/login_page.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'AuthService.dart'; // AuthService를 import 합니다.
+import '../Services/AuthService.dart'; // AuthService를 import 합니다.
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});

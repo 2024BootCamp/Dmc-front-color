@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'AuthService.dart'; // Import your AuthService
+import '../Services/AuthService.dart'; // Import your AuthService
 import 'main_page.dart';
 import 'signup_page1.dart';
 
