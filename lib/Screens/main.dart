@@ -1,40 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'AuthService.dart'; // AuthService를 import합니다.
 import '../Screens/login_page.dart';
+import '../Screens/home_page.dart';
 
 // 메인 함수, 애플리케이션 진입점
 void main() async {
-  // 한국 로케일 날짜 형식 초기화
+  WidgetsFlutterBinding.ensureInitialized(); // 비동기 초기화
   await initializeDateFormatting('ko_KR', null);
-  // MyApp 위젯 실행
-  runApp(const MyApp());
+
+  final authService = AuthService('http://192.168.56.1:8081'); // 서버의 base URL
+  final token = await authService.getToken();
+  final isAuthenticated = token != null;
+
+  runApp(MyApp(isAuthenticated: isAuthenticated));
 }
 
 // 애플리케이션의 루트 위젯
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isAuthenticated; // 인증 상태
+
+  const MyApp({super.key, required this.isAuthenticated});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Your App Title', // 앱 제목 설정 (선택 사항)
+      title: 'Your App Title',
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        // BottomNavigationBar의 테마 설정
         bottomNavigationBarTheme: BottomNavigationBarThemeData(
-          backgroundColor: Color.fromARGB(255, 173, 216, 230), // 네비게이션 바 배경색
-          selectedItemColor: Colors.white, // 선택된 아이템 색상
-          unselectedItemColor: Colors.white70, // 선택되지 않은 아이템 색상
+          backgroundColor: Color.fromARGB(255, 173, 216, 230),
+          selectedItemColor: Colors.white,
+          unselectedItemColor: Colors.white70,
           selectedLabelStyle: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
-          ), // 선택된 라벨 스타일
+          ),
           unselectedLabelStyle: TextStyle(
             color: Colors.white70,
-          ), // 선택되지 않은 라벨 스타일
+          ),
         ),
       ),
-      home: LoginPage(), // 시작 페이지를 LoginPage로 설정
+      home: isAuthenticated ? HomePage() : LoginPage(), // 로그인 상태에 따라 페이지 결정
     );
   }
 }

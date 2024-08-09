@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // Import the intl package for date formatting
 import 'signup_page2.dart';
 
 class SignupPage1 extends StatefulWidget {
@@ -9,7 +10,6 @@ class SignupPage1 extends StatefulWidget {
 }
 
 class _SignupPage1State extends State<SignupPage1> {
-  // 입력 필드 컨트롤러
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -18,23 +18,20 @@ class _SignupPage1State extends State<SignupPage1> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _birthdateController = TextEditingController();
-  final TextEditingController _locationController =
-      TextEditingController(); // 지역 필드 컨트롤러
+  final TextEditingController _locationController = TextEditingController();
 
   bool _passwordsMatch = false;
+  String? _selectedGender;
 
   @override
   void initState() {
     super.initState();
-
-    // 비밀번호와 비밀번호 재입력 필드에 리스너 추가
     _passwordController.addListener(_checkPasswordsMatch);
     _passwordConfirmController.addListener(_checkPasswordsMatch);
   }
 
   @override
   void dispose() {
-    // 컨트롤러를 dispose하여 메모리 누수 방지
     _passwordController.dispose();
     _passwordConfirmController.dispose();
     super.dispose();
@@ -47,53 +44,65 @@ class _SignupPage1State extends State<SignupPage1> {
     });
   }
 
-  // 성별 선택 변수
-  String? _selectedGender;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back,
-              color: Colors.white), // 뒤로가기 아이콘 색상 흰색으로 설정
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
-        title: const Text(
-          '회원가입',
-          style: TextStyle(color: Colors.white), // AppBar 제목 글자 색상 흰색으로 설정
-        ),
-        backgroundColor:
-            const Color.fromARGB(255, 173, 216, 230), // AppBar 배경색 설정
+        title: const Text('회원가입', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color.fromARGB(255, 173, 216, 230),
         actions: [
-          // 현재 페이지에서 다음 페이지로 이동 버튼
           IconButton(
-            icon: const Icon(Icons.arrow_forward,
-                color: Colors.white), // 아이콘 색상 흰색으로 설정
+            icon: const Icon(Icons.arrow_forward, color: Colors.white),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SignupPage2()),
-              );
+              DateTime? parsedDate;
+              try {
+                parsedDate = DateFormat('yyyy-MM-dd')
+                    .parseStrict(_birthdateController.text);
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text(
+                          'Invalid date format. Please enter in yyyy-MM-dd format.')),
+                );
+                return;
+              }
+
+              if (parsedDate != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SignupPage2(
+                      userId: _idController.text,
+                      userName: _nameController.text,
+                      password: _passwordController.text,
+                      gender: _selectedGender == '여' ? 'F' : 'M',
+                      birthday: _birthdateController.text,
+                      phone: _phoneController.text,
+                      email: _emailController.text,
+                      address: _locationController.text,
+                    ),
+                  ),
+                );
+              }
             },
           ),
         ],
       ),
       body: Container(
-        color: Colors.white, // 전체 화면 배경색을 흰색으로 설정
+        color: Colors.white,
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
-            // 아이디 입력 필드
             buildTextField("아이디", "아이디 입력", _idController, true),
-            // 이메일 입력 필드 (선택)
             buildTextField("이메일", "이메일 입력(선택)", _emailController, false),
-            // 비밀번호 입력 필드
             buildTextField("비밀번호", "비밀번호 입력", _passwordController, true,
                 obscureText: true),
-            // 비밀번호 재입력 필드
             buildTextField(
                 "비밀번호 재입력", "비밀번호 재입력", _passwordConfirmController, true,
                 obscureText: true),
@@ -108,33 +117,52 @@ class _SignupPage1State extends State<SignupPage1> {
                   ),
                 ],
               ),
-            //닉네임 입력 필드 (추가)
             buildTextField("유저 네임", "유저 네임 입력(필수)", _nameController, false),
-            // 휴대폰 번호 입력 필드
             buildTextField("휴대폰 번호", "010 0000 0000", _phoneController, false),
-            // 생년월일 입력 필드
-            buildTextField("생년월일", "생년월일 입력", _birthdateController, false),
-            // 성별 입력 필드
+            buildTextField(
+                "생년월일", "생년월일 입력 (yyyy-MM-dd)", _birthdateController, false),
             buildGenderField(),
-            // 사는 지역 입력 필드
             buildTextField("사는 지역", "지역 입력", _locationController, false),
             const SizedBox(height: 24),
-            // 다음 버튼
             ElevatedButton(
               onPressed: () {
-                // 다음 페이지로 이동
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SignupPage2()),
-                );
+                DateTime? parsedDate;
+                try {
+                  parsedDate = DateFormat('yyyy-MM-dd')
+                      .parseStrict(_birthdateController.text);
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text(
+                            'Invalid date format. Please enter in yyyy-MM-dd format.')),
+                  );
+                  return;
+                }
+
+                if (parsedDate != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SignupPage2(
+                        userId: _idController.text,
+                        userName: _nameController.text,
+                        password: _passwordController.text,
+                        gender: _selectedGender == '여' ? 'F' : 'M',
+                        birthday: _birthdateController.text,
+                        phone: _phoneController.text,
+                        email: _emailController.text,
+                        address: _locationController.text,
+                      ),
+                    ),
+                  );
+                }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    const Color.fromARGB(255, 173, 216, 230), //버튼 배경 색
-                foregroundColor: Colors.white, // 버튼 텍스트 색상을 흰색으로 설정
-                padding: const EdgeInsets.symmetric(vertical: 16.0), // 버튼 패딩 조정
+                backgroundColor: const Color.fromARGB(255, 173, 216, 230),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0), // 버튼 모서리 둥글게
+                  borderRadius: BorderRadius.circular(10.0),
                 ),
               ),
               child: const Text('다음'),
@@ -145,7 +173,6 @@ class _SignupPage1State extends State<SignupPage1> {
     );
   }
 
-  // 성별 입력 필드
   Widget buildGenderField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -206,7 +233,6 @@ class _SignupPage1State extends State<SignupPage1> {
     );
   }
 
-  // 텍스트 필드 빌드 함수
   Widget buildTextField(String label, String placeholder,
       TextEditingController controller, bool isRequired,
       {bool obscureText = false}) {

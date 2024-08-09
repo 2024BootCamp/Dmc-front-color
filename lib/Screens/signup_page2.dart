@@ -1,49 +1,63 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http; // 추가
+import 'dart:convert'; // 추가
 import 'login_page.dart';
 
 class SignupPage2 extends StatefulWidget {
-  const SignupPage2({super.key});
+  final String userId;
+  final String userName;
+  final String password;
+  final String gender;
+  final String birthday;
+  final String phone;
+  final String email;
+  final String address;
+
+  const SignupPage2({
+    super.key,
+    required this.userId,
+    required this.userName,
+    required this.password,
+    required this.gender,
+    required this.birthday,
+    required this.phone,
+    required this.email,
+    required this.address,
+  });
 
   @override
   _SignupPage2State createState() => _SignupPage2State();
 }
 
 class _SignupPage2State extends State<SignupPage2> {
-  // 입력 필드 컨트롤러
   final TextEditingController _heightController = TextEditingController();
   final TextEditingController _weightController = TextEditingController();
-  final List<String> _conditions = ["당뇨", "고혈압", "해당 사항 없음"]; // 질환 목록
-  final List<bool> _selectedConditions = [false, false, false]; // 선택된 질환 상태
-  int _activityLevel = 3; // 활동량 선택 필드
+  final List<String> _conditions = ["당뇨", "고혈압", "해당 사항 없음"];
+  final List<bool> _selectedConditions = [false, false, false];
+  int _activityLevel = 3;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // 뒤로가기 버튼
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back,
-              color: Colors.white), // 아이콘 색상 흰색으로 설정
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
         title: const Text(
           '회원가입',
-          style: TextStyle(
-              color: Colors.white, fontFamily: 'Quicksand'), // 제목 글자 색상 흰색으로 설정
+          style: TextStyle(color: Colors.white, fontFamily: 'Quicksand'),
         ),
-        backgroundColor:
-            const Color.fromARGB(255, 173, 216, 230), // AppBar 배경색 설정
+        backgroundColor: const Color.fromARGB(255, 173, 216, 230),
       ),
       body: Container(
-        color: Colors.white, // 전체 화면 배경색을 흰색으로 설정
+        color: Colors.white,
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
-            // 키 입력 필드
             buildTextField("키", "cm", _heightController),
-            // 몸무게 입력 필드
             buildTextField("몸무게", "kg", _weightController),
             const Text(
               "갖고 있는 질환",
@@ -51,7 +65,6 @@ class _SignupPage2State extends State<SignupPage2> {
                   fontWeight: FontWeight.bold, fontFamily: 'Quicksand'),
             ),
             const SizedBox(height: 8),
-            // 질환 선택 칩
             Wrap(
               spacing: 10.0,
               children: _conditions.asMap().entries.map((entry) {
@@ -64,15 +77,13 @@ class _SignupPage2State extends State<SignupPage2> {
                   onSelected: (bool selected) {
                     setState(() {
                       if (idx == 2 && selected) {
-                        // '해당 사항 없음'이 선택되면 다른 모든 선택 해제
                         for (int i = 0; i < _selectedConditions.length; i++) {
                           _selectedConditions[i] = (i == 2);
                         }
                       } else {
                         _selectedConditions[idx] = selected;
                         if (selected) {
-                          _selectedConditions[2] =
-                              false; // 다른 선택 시 '해당 사항 없음' 해제
+                          _selectedConditions[2] = false;
                         }
                       }
                     });
@@ -87,9 +98,8 @@ class _SignupPage2State extends State<SignupPage2> {
               "활동량",
               style: TextStyle(
                   fontWeight: FontWeight.bold, fontFamily: 'Quicksand'),
-            ), // 활동량 텍스트
+            ),
             const SizedBox(height: 8),
-            // 활동량 선택 버튼
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: List.generate(5, (index) {
@@ -129,24 +139,16 @@ class _SignupPage2State extends State<SignupPage2> {
               }),
             ),
             const SizedBox(height: 16),
-            // 기록하기 버튼
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  // 회원가입 완료 처리 로직
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginPage()),
-                    (route) => false,
-                  );
+                  _completeSignup();
                 },
                 child: const Text('기록하기',
                     style: TextStyle(
-                        fontFamily: 'Quicksand',
-                        color: Colors.white)), // 버튼 텍스트 색상 흰색으로 설정
+                        fontFamily: 'Quicksand', color: Colors.white)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(
-                      255, 173, 216, 230), // 버튼 배경색을 요청하신 색상으로 설정
+                  backgroundColor: const Color.fromARGB(255, 173, 216, 230),
                 ),
               ),
             ),
@@ -156,7 +158,6 @@ class _SignupPage2State extends State<SignupPage2> {
     );
   }
 
-  // 텍스트 필드 빌드 함수
   Widget buildTextField(
       String label, String unit, TextEditingController controller) {
     return Column(
@@ -188,7 +189,6 @@ class _SignupPage2State extends State<SignupPage2> {
     );
   }
 
-  // 활동량 레벨 텍스트 반환 함수
   String _getActivityLevelText(int level) {
     switch (level) {
       case 1:
@@ -203,6 +203,64 @@ class _SignupPage2State extends State<SignupPage2> {
         return "아주 많다";
       default:
         return "";
+    }
+  }
+
+  Future<void> _completeSignup() async {
+    final height = _heightController.text;
+    final weight = _weightController.text;
+    final conditions = _selectedConditions
+        .asMap()
+        .entries
+        .where((entry) => entry.value)
+        .map((entry) => _conditions[entry.key])
+        .toList();
+    final activityLevel = _activityLevel;
+
+    final response = await http.post(
+      Uri.parse('http://192.168.56.1:8081/account/register'), // 회원가입 API 엔드포인트
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'userId': widget.userId,
+        'userName': widget.userName,
+        'password': widget.password,
+        'gender': widget.gender,
+        'birthday': widget.birthday,
+        'phone': widget.phone,
+        'email': widget.email,
+        'address': widget.address,
+        'height': height,
+        'weight': weight,
+        'conditions': conditions,
+        'activityLevel': activityLevel,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('회원가입 성공!'),
+          duration: const Duration(seconds: 2), // 메시지 표시 시간
+        ),
+      );
+
+      // 일정 시간 후 로그인 페이지로 이동
+      Future.delayed(const Duration(seconds: 2), () {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => LoginPage()),
+          (route) => false,
+        );
+      });
+    } else {
+      // 오류 처리 로직 추가 (예: 서버 오류, 입력값 오류 등)
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('회원가입 실패: ${response.reasonPhrase}'),
+        ),
+      );
     }
   }
 }

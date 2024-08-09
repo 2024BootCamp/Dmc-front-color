@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../Screens/calendar_page.dart';
-import 'profile_page.dart';
+import '../Screens/profile_page.dart';
 
 //음식 추천 페이지
 class HomePage extends StatefulWidget {
