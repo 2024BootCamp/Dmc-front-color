@@ -109,30 +109,27 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: const Color.fromARGB(255, 173, 216, 230),
         actions: [
           IconButton(
-            icon: Icon(Icons.calendar_today,
-                color: Colors.white), // 캘린더 아이콘 흰색으로 바꿈
+            icon: Icon(Icons.calendar_today, color: Colors.white),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (context) => const CalendarPage()), // 캘린더 페이지로 이동
+                MaterialPageRoute(builder: (context) => const CalendarPage()),
               );
             },
           ),
           IconButton(
-            icon: Icon(Icons.account_circle, color: Colors.white), // 프로필 아이콘 흰색
+            icon: Icon(Icons.account_circle, color: Colors.white),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (context) => const ProfilePage()), // 프로필 페이지로 이동
+                MaterialPageRoute(builder: (context) => const ProfilePage()),
               );
             },
           ),
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: _fetchMealsByDate, // 새로 고침 시 특정 날짜의 식단 데이터 새로 가져오기
+        onRefresh: _fetchMealsByDate,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Padding(
@@ -155,8 +152,7 @@ class _HomePageState extends State<HomePage> {
                     ElevatedButton(
                       onPressed: () => _selectDate(context),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                        const Color.fromARGB(255, 173, 216, 230),
+                        backgroundColor: const Color.fromARGB(255, 173, 216, 230),
                       ),
                       child: const Text(
                         '날짜 선택',
@@ -170,33 +166,27 @@ class _HomePageState extends State<HomePage> {
                 ),
                 const SizedBox(height: 16),
                 // 식단 정보
-                ..._meals.asMap().entries.map((entry) {
-                  int idx = entry.key;
-                  List<Map<String, dynamic>> mealList = entry.value;
-                  return Column(
-                    children: [
-                      buildMealCard(mealList),
-                      if (idx == _meals.length - 1) ...[
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: () async {
-                            await _fetchTodayMeal(); // 추천 버튼 클릭 시 오늘의 추천 식단 가져오기
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(255, 173, 216, 230),
-                          ),
-                          child: const Text(
-                            '오늘의 추천 식단',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'Quicksand',
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  );
-                }).toList(),
+                if (_meals.isNotEmpty)
+                  ..._meals.asMap().entries.map((entry) {
+                    return buildMealCard(entry.value);
+                  }).toList(),
+                // 추천 식단 버튼을 항상 보이도록 설정
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () async {
+                    await _fetchTodayMeal(); // 추천 버튼 클릭 시 오늘의 추천 식단 가져오기
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 173, 216, 230),
+                  ),
+                  child: const Text(
+                    '오늘의 추천 식단',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: 'Quicksand',
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

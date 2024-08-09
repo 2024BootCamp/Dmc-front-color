@@ -139,19 +139,18 @@ class _ProfilePageState extends State<ProfilePage> {
                 await _logout(); // 로그아웃 처리
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    const Color.fromARGB(255, 173, 216, 230), // 앱바와 동일한 색상
+                backgroundColor: const Color.fromARGB(255, 173, 216, 230), // 앱바와 동일한 색상
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 32), // 버튼의 수직 및 수평 여백을 늘림
               ),
               child: const Text(
                 '로그아웃',
                 style: TextStyle(
                   color: Colors.white,
                   fontFamily: 'Quicksand',
-                  fontSize: 16,
+                  fontSize: 18, // 폰트 크기를 약간 늘림
                 ),
               ),
             ),
