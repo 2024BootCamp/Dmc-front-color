@@ -7,7 +7,6 @@
 //   String userId;
 //   String password;
 //
-//   LoginModel({this.userId, this.password});
 //
 //   factory LoginModel.fromJson(Map<String, dynamic> json) =>
 //       LoginModel(userId: json["userId"], password: json["password"]);

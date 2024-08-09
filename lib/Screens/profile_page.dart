@@ -45,7 +45,8 @@ class _ProfilePageState extends State<ProfilePage> {
   // 로그아웃 함수
   Future<void> _logout() async {
     try {
-      final authService = AuthService('http://192.168.0.1:8081//account/logout');
+      final authService =
+          AuthService('http://192.168.56.1:8081/account/logout');
       await AuthService.clearToken();
       // 로그아웃 후 적절한 화면으로 리디렉션
       Navigator.pushReplacement(
@@ -92,7 +93,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     backgroundImage: _profileImagePath != null
                         ? FileImage(File(_profileImagePath!))
                         : const AssetImage('assets/profile_image.png')
-                    as ImageProvider,
+                            as ImageProvider,
                   ),
                   // 프로필 이미지 변경 아이콘
                   Positioned(
@@ -138,7 +139,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 await _logout(); // 로그아웃 처리
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 173, 216, 230), // 앱바와 동일한 색상
+                backgroundColor:
+                    const Color.fromARGB(255, 173, 216, 230), // 앱바와 동일한 색상
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -223,14 +225,14 @@ class _ProfilePageState extends State<ProfilePage> {
           actions: [
             TextButton(
               child:
-              const Text('취소', style: TextStyle(fontFamily: 'Quicksand')),
+                  const Text('취소', style: TextStyle(fontFamily: 'Quicksand')),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
               child:
-              const Text('저장', style: TextStyle(fontFamily: 'Quicksand')),
+                  const Text('저장', style: TextStyle(fontFamily: 'Quicksand')),
               onPressed: () {
                 onEdit(controller.text); // 변경된 값 저장
                 Navigator.of(context).pop();
