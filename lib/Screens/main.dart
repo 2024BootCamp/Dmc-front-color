@@ -11,7 +11,7 @@ void main() async {
   await initializeDateFormatting('ko_KR', null);
 
   final authService = AuthService('http://192.168.56.1:8081'); // 서버의 base URL
-  final token = await authService.getToken();
+  final token = await AuthService.getToken();
   final isAuthenticated = token != null;
 
   runApp(MyApp(isAuthenticated: isAuthenticated));

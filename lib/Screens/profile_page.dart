@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/Screens/login_page.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'AuthService.dart'; // AuthService를 import 합니다.
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -39,6 +42,27 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  // 로그아웃 함수
+  Future<void> _logout() async {
+    try {
+      final authService =
+          AuthService('http://192.168.56.1:8081/account/logout');
+      await AuthService.clearToken();
+      // 로그아웃 후 적절한 화면으로 리디렉션
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage()),
+      );
+    } catch (e) {
+      // 오류 처리
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('로그아웃 실패: ${e.toString()}'),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,7 +74,10 @@ class _ProfilePageState extends State<ProfilePage> {
             Navigator.pop(context);
           },
         ),
-        title: const Text('마이페이지', style: TextStyle(fontFamily: 'Quicksand', color: Colors.white,)), //마이페이지 글자 흰색
+        title: const Text(
+          '마이페이지',
+          style: TextStyle(fontFamily: 'Quicksand', color: Colors.white),
+        ), // 마이페이지 글자 흰색
         backgroundColor: const Color.fromARGB(255, 173, 216, 230), // 앱바 색상 설정
       ),
       body: Padding(
@@ -66,7 +93,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     backgroundImage: _profileImagePath != null
                         ? FileImage(File(_profileImagePath!))
                         : const AssetImage('assets/profile_image.png')
-                    as ImageProvider,
+                            as ImageProvider,
                   ),
                   // 프로필 이미지 변경 아이콘
                   Positioned(
@@ -105,6 +132,29 @@ class _ProfilePageState extends State<ProfilePage> {
                 gender = newValue;
               });
             }),
+            const SizedBox(height: 16),
+            // 로그아웃 버튼
+            ElevatedButton(
+              onPressed: () async {
+                await _logout(); // 로그아웃 처리
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    const Color.fromARGB(255, 173, 216, 230), // 앱바와 동일한 색상
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              child: const Text(
+                '로그아웃',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Quicksand',
+                  fontSize: 16,
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -175,14 +225,14 @@ class _ProfilePageState extends State<ProfilePage> {
           actions: [
             TextButton(
               child:
-              const Text('취소', style: TextStyle(fontFamily: 'Quicksand')),
+                  const Text('취소', style: TextStyle(fontFamily: 'Quicksand')),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
               child:
-              const Text('저장', style: TextStyle(fontFamily: 'Quicksand')),
+                  const Text('저장', style: TextStyle(fontFamily: 'Quicksand')),
               onPressed: () {
                 onEdit(controller.text); // 변경된 값 저장
                 Navigator.of(context).pop();
