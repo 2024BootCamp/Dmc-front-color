@@ -65,7 +65,6 @@ class _HomePageState extends State<HomePage> {
   // 문자열을 숫자로 변환하는 함수
   double parseStringToDouble(dynamic value) {
     if (value is String) {
-      // 문자열에서 숫자 부분만 추출
       return double.tryParse(value.replaceAll(RegExp(r'[^\d.]'), '')) ?? 0.0;
     }
     return (value as num?)?.toDouble() ?? 0.0;
@@ -97,97 +96,108 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white, // 배경색을 흰색으로 설정
-      appBar: AppBar(
-        title: const Text('추천 식단',
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: 'Quicksand',
-            )), // 앱바 타이틀
-        centerTitle: true,
-        backgroundColor: const Color.fromARGB(255, 173, 216, 230),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.calendar_today, color: Colors.white),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CalendarPage()),
-              );
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.account_circle, color: Colors.white),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ProfilePage()),
-              );
-            },
-          ),
-        ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: _fetchMealsByDate,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 날짜 선택 버튼
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '${DateFormat('yyyy년 MM월 dd일').format(_selectedDate)}의 맞춤 식단',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Quicksand',
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () => _selectDate(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 173, 216, 230),
-                      ),
-                      child: const Text(
-                        '날짜 선택',
-                        style: TextStyle(
-                          color: Colors.white,
+    return WillPopScope(
+      onWillPop: () async {
+        // 뒤로가기 버튼을 눌렀을 때 아무 동작도 하지 않음
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white, // 배경색을 흰색으로 설정
+        appBar: AppBar(
+          title: const Text('추천 식단',
+              style: TextStyle(
+                color: Colors.white,
+                fontFamily: 'Quicksand',
+              )), // 앱바 타이틀
+          centerTitle: true,
+          backgroundColor: const Color.fromARGB(255, 173, 216, 230),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.calendar_today, color: Colors.white),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const CalendarPage()),
+                );
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.account_circle, color: Colors.white),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ProfilePage()),
+                );
+              },
+            ),
+          ],
+        ),
+        body: RefreshIndicator(
+          onRefresh: _fetchMealsByDate,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 날짜 선택 버튼
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '${DateFormat('yyyy년 MM월 dd일').format(_selectedDate)}의 맞춤 식단',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                           fontFamily: 'Quicksand',
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                // 식단 정보
-                if (_meals.isNotEmpty)
-                  ..._meals.asMap().entries.map((entry) {
-                    return buildMealCard(entry.value);
-                  }).toList(),
-                // 추천 식단 버튼을 항상 보이도록 설정
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () async {
-                    await _fetchTodayMeal(); // 추천 버튼 클릭 시 오늘의 추천 식단 가져오기
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 173, 216, 230),
+                      ElevatedButton(
+                        onPressed: () => _selectDate(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color.fromARGB(255, 173, 216, 230),
+                        ),
+                        child: const Text(
+                          '날짜 선택',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Quicksand',
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  child: const Text(
-                    '오늘의 추천 식단',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: 'Quicksand',
-                    ),
+                  const SizedBox(height: 16),
+                  // 식단 정보
+                  if (_meals.isNotEmpty)
+                    ..._meals.asMap().entries.map((entry) {
+                      return buildMealCard(entry.value);
+                    }).toList(),
+                  // 추천 식단 버튼을 중앙에 위치시킴
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center, // 버튼을 중앙에 배치
+                    children: [
+                      ElevatedButton(
+                        onPressed: () async {
+                          await _fetchTodayMeal(); // 추천 버튼 클릭 시 오늘의 추천 식단 가져오기
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color.fromARGB(255, 173, 216, 230),
+                        ),
+                        child: const Text(
+                          '오늘의 추천 식단',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Quicksand',
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

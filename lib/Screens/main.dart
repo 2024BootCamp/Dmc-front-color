@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../Services/AuthService.dart'; // AuthService를 import합니다.
+import '../Services/AuthService.dart'; // AuthService를 import
 import '../Screens/login_page.dart';
 import '../Screens/home_page.dart';
-
+// RecordService, signup2, main, login, ReportService
 // 메인 함수, 애플리케이션 진입점
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // 비동기 초기화
   await initializeDateFormatting('ko_KR', null);
 
-  final authService = AuthService('http://192.168.56.1:8081'); // 서버의 base URL
+  final authService = AuthService('http://192.168.0.12:8081'); // 서버의 base URL
   final token = await AuthService.getToken();
   final isAuthenticated = token != null;
 

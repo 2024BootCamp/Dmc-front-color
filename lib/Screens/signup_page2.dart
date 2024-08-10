@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http; // 추가
 import 'dart:convert'; // 추가
 import 'login_page.dart';
-
+//221줄에 ip주소 변경
 class SignupPage2 extends StatefulWidget {
   final String userId;
   final String userName;
@@ -218,7 +218,7 @@ class _SignupPage2State extends State<SignupPage2> {
     final activityLevel = _activityLevel;
 
     final response = await http.post(
-      Uri.parse('http://192.168.0.1:8081/account/register'), // 회원가입 API 엔드포인트
+      Uri.parse('http://192.168.0.12:8081/account/register'), // 회원가입 API 엔드포인트
       headers: {
         'Content-Type': 'application/json',
       },
