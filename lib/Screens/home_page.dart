@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'meal_service.dart'; // import meal_service.dart 추가
+import '../Services/meal_service.dart'; // import meal_service.dart 추가
 import 'profile_page.dart';
 import '../Screens/calendar_page.dart';
 
@@ -15,6 +15,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   DateTime _selectedDate = DateTime.now(); // 선택된 날짜를 저장
   List<List<Map<String, dynamic>>> _meals = []; // 식단 데이터 저장 (각 식단이 List<Map<String, dynamic>> 형태로 저장됨)
+  Map<int, bool?> _likeStatuses = {}; // 각 recommendId에 대한 호불호 상태를 저장하는 맵
 
   @override
   void initState() {
@@ -94,21 +95,28 @@ class _HomePageState extends State<HomePage> {
     };
   }
 
+  // 좋아요/싫어요 상태 업데이트 함수
+  void _updateLikeStatus(int recommendId, bool like) {
+    setState(() {
+      _likeStatuses[recommendId] = like;
+    });
+    postLikeDislike(recommendId, like);
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        // 뒤로가기 버튼을 눌렀을 때 아무 동작도 하지 않음
         return false;
       },
       child: Scaffold(
-        backgroundColor: Colors.white, // 배경색을 흰색으로 설정
+        backgroundColor: Colors.white,
         appBar: AppBar(
           title: const Text('추천 식단',
               style: TextStyle(
                 color: Colors.white,
                 fontFamily: 'Quicksand',
-              )), // 앱바 타이틀
+              )),
           centerTitle: true,
           backgroundColor: const Color.fromARGB(255, 173, 216, 230),
           actions: [
@@ -172,8 +180,12 @@ class _HomePageState extends State<HomePage> {
                   // 식단 정보
                   if (_meals.isNotEmpty)
                     ..._meals.asMap().entries.map((entry) {
-                      return buildMealCard(entry.value);
+                      var mealList = entry.value; // 각 식단
+                      int recommendId = entry.key; // recommendId로 변경해야 함
+
+                      return buildMealCard(mealList, recommendId);
                     }).toList(),
+
                   // 추천 식단 버튼을 중앙에 위치시킴
                   const SizedBox(height: 16),
                   Row(
@@ -206,75 +218,97 @@ class _HomePageState extends State<HomePage> {
   }
 
   // 식사 카드 위젯 생성 (한 식단을 하나의 카드로 표시)
-  Widget buildMealCard(List<Map<String, dynamic>> mealList) {
+  Widget buildMealCard(List<Map<String, dynamic>> mealList, int recommendId) {
     final labels = ['밥', '국', '반찬1', '반찬2'];
+    bool? likeStatus = _likeStatuses[recommendId]; // 현재 식단의 호불호 상태 가져오기
 
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(vertical: 8),
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.white, // 카드 배경색을 흰색으로 설정
+        color: Colors.white,
         borderRadius: BorderRadius.circular(8.0),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.3),
             spreadRadius: 2,
             blurRadius: 4,
-            offset: const Offset(0, 2), // 카드 그림자 위치
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: mealList.asMap().entries.map((entry) {
-          int idx = entry.key;
-          Map<String, dynamic> meal = entry.value;
+        children: [
+          ...mealList.asMap().entries.map((entry) {
+            int idx = entry.key;
+            Map<String, dynamic> meal = entry.value;
 
-          var nutrients = calculateNutrient(meal, labels[idx]);
+            var nutrients = calculateNutrient(meal, labels[idx]);
 
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${labels[idx]}: ${meal['meal']}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Quicksand',
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${labels[idx]}: ${meal['meal']}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Quicksand',
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '칼로리: ${nutrients['calories']?.toStringAsFixed(1) ?? '0.0'} kcal',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontFamily: 'Quicksand',
+                  const SizedBox(height: 4),
+                  Text(
+                    '칼로리: ${nutrients['calories']?.toStringAsFixed(1) ?? '0.0'} kcal',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontFamily: 'Quicksand',
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '당분: ${nutrients['sugar']?.toStringAsFixed(2) ?? '0.00'} g',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontFamily: 'Quicksand',
+                  const SizedBox(height: 4),
+                  Text(
+                    '당분: ${nutrients['sugar']?.toStringAsFixed(2) ?? '0.00'} g',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontFamily: 'Quicksand',
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '염분: ${nutrients['salt']?.toStringAsFixed(2) ?? '0.00'} g',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontFamily: 'Quicksand',
+                  const SizedBox(height: 4),
+                  Text(
+                    '염분: ${nutrients['salt']?.toStringAsFixed(2) ?? '0.00'} g',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontFamily: 'Quicksand',
+                    ),
                   ),
+                  if (idx < mealList.length - 1) const Divider(color: Colors.grey),
+                ],
+              ),
+            );
+          }).toList(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              IconButton(
+                icon: Icon(
+                  Icons.thumb_up,
+                  color: likeStatus == true ? Colors.blue : Colors.grey, // 선택 여부에 따라 색상 변경
                 ),
-                if (idx < mealList.length - 1) const Divider(color: Colors.grey), // 각 음식 사이에 구분선 추가
-              ],
-            ),
-          );
-        }).toList(),
+                onPressed: () => _updateLikeStatus(recommendId, true),
+              ),
+              IconButton(
+                icon: Icon(
+                  Icons.thumb_down,
+                  color: likeStatus == false ? Colors.red : Colors.grey, // 선택 여부에 따라 색상 변경
+                ),
+                onPressed: () => _updateLikeStatus(recommendId, false),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

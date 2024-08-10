@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import '../Services/AuthService.dart';
+import 'AuthService.dart';
 
 // 오늘의 추천 식단 API 호출 함수
 Future<List<Map<String, dynamic>>> fetchRecommendedMealForToday() async {
@@ -37,6 +37,16 @@ Future<List<Map<String, dynamic>>> fetchRecommendedMealForToday() async {
     print('Error fetching today\'s recommended meal: $e');
     rethrow;
   }
+}
+// 식단 호불호
+Future<bool> postLikeDislike(int recommendId, bool like) async {
+  var url = Uri.parse('http://your-server.com/api/like-meal/$recommendId');
+  var response = await http.post(url, body: {
+    'recommendId': recommendId.toString(),
+    'like': like.toString(),
+  });
+
+  return response.statusCode == 200;
 }
 
 // 날짜에 맞는 추천된 식단 데이터 가져오기 함수
