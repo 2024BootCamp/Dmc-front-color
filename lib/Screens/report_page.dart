@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../Services/RecordService.dart';
-import '../Services/ReportService.dart';  // ReportService 추가
+import '../Services/ReportService.dart';
 import 'profile_page.dart';
 
 class ReportPage extends StatefulWidget {
@@ -15,10 +15,9 @@ class ReportPage extends StatefulWidget {
 
 class _ReportPageState extends State<ReportPage> {
   String _selectedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
-  List<Map<String, dynamic>> _mealLogs = []; // 선택한 날짜의 모든 식단 기록 저장
-  int? _appRating;
+  List<Map<String, dynamic>> _mealLogs = [];
   final RecordService _recordService = RecordService();
-  final ReportService _reportService = ReportService();  // ReportService 인스턴스 추가
+  final ReportService _reportService = ReportService();
 
   @override
   void initState() {
@@ -55,24 +54,21 @@ class _ReportPageState extends State<ReportPage> {
     }
   }
 
-  Future<void> _evaluateAppRating(int recordId) async {
+  Future<void> _evaluateAppRating(int recordId, Function(double) onRatingReceived) async {
     try {
-      double score = await _reportService.evaluateRecord(recordId);  // 서버에서 점수 가져오기
-      setState(() {
-        _appRating = score.round();  // 받아온 점수를 반영
-      });
+      double score = await _reportService.evaluateRecord(recordId);
+      onRatingReceived(score);
     } catch (e) {
       print('Error evaluating meal: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('식단 평가에 실패했습니다: $e')),
-      );
+      // null이거나 오류가 발생하면 60점으로 처리
+      onRatingReceived(60);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // 전체 화면 배경색을 흰색으로 설정
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('리포트',
             style: TextStyle(color: Colors.white, fontFamily: 'Quicksand')),
@@ -120,7 +116,10 @@ class _ReportPageState extends State<ReportPage> {
                   : ListView.builder(
                 itemCount: _mealLogs.length,
                 itemBuilder: (context, index) {
-                  return _buildMealDetails(_mealLogs[index]);
+                  return MealDetailCard(
+                    mealLog: _mealLogs[index],
+                    evaluateAppRating: _evaluateAppRating,
+                  );
                 },
               ),
             ),
@@ -129,26 +128,48 @@ class _ReportPageState extends State<ReportPage> {
       ),
     );
   }
+}
 
-  Widget _buildMealDetails(Map<String, dynamic> mealLog) {
+class MealDetailCard extends StatefulWidget {
+  final Map<String, dynamic> mealLog;
+  final Future<void> Function(int, Function(double)) evaluateAppRating;
+
+  const MealDetailCard({
+    Key? key,
+    required this.mealLog,
+    required this.evaluateAppRating,
+  }) : super(key: key);
+
+  @override
+  _MealDetailCardState createState() => _MealDetailCardState();
+}
+
+class _MealDetailCardState extends State<MealDetailCard> {
+  double? _appRating;
+
+  @override
+  Widget build(BuildContext context) {
+    final listFoods = (widget.mealLog['listFoods'] as Map?)?.cast<String, dynamic>() ?? {};
+    final content = widget.mealLog['content'] ?? '코멘트 없음';
+
     return Card(
-      color: Colors.white, // 카드 배경색을 흰색으로 설정
+      color: Colors.white,
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       elevation: 4.0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10.0),
       ),
       child: Container(
-        width: double.infinity, // 카드가 화면의 너비와 거의 같도록 설정
+        width: double.infinity,
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('코멘트: ${mealLog['content'] ?? '코멘트 없음'}'),
+            Text('코멘트: $content'),
             const SizedBox(height: 8),
-            Text('음식 목록:', style: const TextStyle(fontWeight: FontWeight.bold)),
+            const Text('음식 목록:', style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            ...(mealLog['listFoods'] as Map<String, dynamic>).entries.map((entry) {
+            ...listFoods.entries.map((entry) {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4.0),
                 child: Text('${entry.key}: ${entry.value}g'),
@@ -161,11 +182,14 @@ class _ReportPageState extends State<ReportPage> {
                 const Text('식단 평가 점수'),
                 ElevatedButton(
                   onPressed: () {
-                    _evaluateAppRating(mealLog['recordId']);
+                    widget.evaluateAppRating(widget.mealLog['recordId'], (score) {
+                      setState(() {
+                        _appRating = score == null ? 0 : score; // null이면 0점
+                      });
+                    });
                   },
                   child: const Text('평가하기',
-                      style:
-                      TextStyle(fontFamily: 'Quicksand', color: Colors.white)),
+                      style: TextStyle(fontFamily: 'Quicksand', color: Colors.white)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 173, 216, 230),
                   ),
@@ -174,23 +198,19 @@ class _ReportPageState extends State<ReportPage> {
             ),
             if (_appRating != null) ...[
               const SizedBox(height: 16),
-              _buildAppRating(),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '평점 (5점 만점): ${_appRating!.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Quicksand',
+                  ),
+                ),
+              ),
             ]
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAppRating() {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Text(
-        '평점 (5점 만점): $_appRating',
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          fontFamily: 'Quicksand',
         ),
       ),
     );
