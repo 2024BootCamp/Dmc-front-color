@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'calendar_page.dart';
 import '../Screens/profile_page.dart';
-import '../Screens/report_page.dart';
+import '../Services/RecordService.dart';
 
 class FoodLogPage extends StatefulWidget {
   const FoodLogPage({super.key});
@@ -16,19 +14,13 @@ class FoodLogPage extends StatefulWidget {
 
 class FoodLogPageState extends State<FoodLogPage> {
   final TextEditingController _foodController = TextEditingController();
-  final TextEditingController _commentController = TextEditingController();
   final TextEditingController _gramsController = TextEditingController();
-  String _selectedMeal = '아침';
+  final TextEditingController _commentController = TextEditingController();
   String _selectedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
   final ImagePicker _picker = ImagePicker();
-  final List<String> _foodItems = [];
-  Map<String, List<Map<String, dynamic>>> _mealLogs = {
-    '아침': [],
-    '점심': [],
-    '저녁': [],
-  };
+  final List<Map<String, dynamic>> _foodItems = []; // 음식 리스트
 
-  Map<String, List<Map<String, dynamic>>> get mealLogs => _mealLogs;
+  final RecordService _recordService = RecordService(); // RecordService 인스턴스
 
   @override
   void initState() {
@@ -44,11 +36,7 @@ class FoodLogPageState extends State<FoodLogPage> {
 
     Future.delayed(duration, () {
       setState(() {
-        _mealLogs = {
-          '아침': [],
-          '점심': [],
-          '저녁': [],
-        };
+        _foodItems.clear();
       });
       _clearLogsAtMidnight();
     });
@@ -59,34 +47,74 @@ class FoodLogPageState extends State<FoodLogPage> {
     final pickedFile = await _picker.pickImage(source: ImageSource.camera);
     if (pickedFile != null) {
       setState(() {
-        _foodItems.add(pickedFile.path);
+        // 사용자가 사진을 선택하면 이를 화면에 보여주고 싶다면 추가 로직 필요
       });
     }
   }
 
   // 음식 아이템을 추가하는 함수
-  void _addFoodItem(String food, String grams, [String? comment]) {
+  void _addFoodItem() {
     setState(() {
-      _mealLogs[_selectedMeal]?.add({
-        'food': food,
-        'comment': comment,
-        'grams': grams,
-        'date': _selectedDate,
-        'imagePath': _foodItems.isNotEmpty ? _foodItems.last : null,
-        'time': DateFormat('HH:mm:ss').format(DateTime.now()),
+      _foodItems.add({
+        'food': _foodController.text,
+        'grams': _gramsController.text,
       });
       _foodController.clear();
-      _commentController.clear();
       _gramsController.clear();
-      _foodItems.clear();
     });
+    print("현재 추가된 음식들: $_foodItems");
+  }
+
+  // 음식 아이템을 수정하는 함수
+  void _editFoodItem(int index) {
+    final item = _foodItems[index];
+    _foodController.text = item['food'];
+    _gramsController.text = item['grams'];
+    _removeFoodItem(index);
   }
 
   // 음식 아이템을 제거하는 함수
-  void _removeFoodItem(String meal, int index) {
+  void _removeFoodItem(int index) {
     setState(() {
-      _mealLogs[meal]?.removeAt(index);
+      _foodItems.removeAt(index);
     });
+  }
+
+  // 식단을 서버에 저장하는 함수 (기록 버튼 누를 때 호출)
+  Future<void> _saveMealRecord() async {
+    final Map<String, double> listMeal = {};
+
+    for (var item in _foodItems) {
+      String foodName = item['food'] as String;
+      double grams = double.tryParse(item['grams'] ?? '0') ?? 0.0;
+      listMeal[foodName] = grams;
+    }
+
+    print("전송될 listMeal: $listMeal");
+
+    final mealRecord = {
+      'date': _selectedDate,
+      'image': '사진 없음', // 필요에 따라 변경
+      'content': _commentController.text.isNotEmpty
+          ? _commentController.text
+          : '코멘트 없음',
+      'listMeal': listMeal, // RecordRequest의 listMeal 필드에 맞춰 수정
+    };
+
+    try {
+      await _recordService.addMealRecord(mealRecord);
+      setState(() {
+        _foodItems.clear(); // 저장 후 음식 리스트 초기화
+        _commentController.clear(); // 코멘트 초기화
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('식단이 저장되었습니다.')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('식단 저장에 실패했습니다: $e')),
+      );
+    }
   }
 
   // 날짜 선택하는 함수
@@ -101,42 +129,6 @@ class FoodLogPageState extends State<FoodLogPage> {
       setState(() {
         _selectedDate = DateFormat('yyyy-MM-dd').format(picked);
       });
-    }
-  }
-
-  // 음식 아이템을 수정하는 함수
-  void _editFoodItem(String meal, int index) {
-    final item = _mealLogs[meal]![index];
-    _foodController.text = item['food'];
-    _gramsController.text = item['grams'];
-    _commentController.text = item['comment'] ?? '';
-    _removeFoodItem(meal, index);
-  }
-
-  // 음식 기록을 평가하는 함수 (백엔드 연동)
-  Future<void> _evaluateMeals() async {
-    try {
-      final response = await http.post(
-        Uri.parse('https://yourbackend.com/evaluate'), // 여기에 실제 백엔드 URL 입력
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(_mealLogs),
-      );
-
-      if (response.statusCode == 200) {
-        final result = json.decode(response.body);
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ReportPage(result: result),
-          ),
-        );
-      } else {
-        throw Exception('Failed to evaluate meals');
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to evaluate meals: $e')),
-      );
     }
   }
 
@@ -160,8 +152,7 @@ class FoodLogPageState extends State<FoodLogPage> {
             },
           ),
           IconButton(
-            //profile
-            icon: Icon(Icons.account_circle, color: Colors.white), // 아이콘 색상 변경
+            icon: Icon(Icons.account_circle, color: Colors.white),
             onPressed: () {
               Navigator.push(
                 context,
@@ -178,9 +169,26 @@ class FoodLogPageState extends State<FoodLogPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                buildMealButton('아침'),
-                buildMealButton('점심'),
-                buildMealButton('저녁'),
+                ElevatedButton(
+                  onPressed: () {
+                    _selectDate(context);
+                  },
+                  child: Text('날짜 선택: $_selectedDate',
+                      style: const TextStyle(fontFamily: 'Quicksand')),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: const Color.fromARGB(255, 102, 102, 102),
+                    backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: _pickImage,
+                  child: const Text('사진 추가',
+                      style: TextStyle(fontFamily: 'Quicksand')),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: const Color.fromARGB(255, 102, 102, 102),
+                    backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -198,30 +206,83 @@ class FoodLogPageState extends State<FoodLogPage> {
                     ),
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.camera_alt),
-                  onPressed: _pickImage,
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    controller: _gramsController,
+                    decoration: InputDecoration(
+                      hintText: '그램 입력',
+                      hintStyle: const TextStyle(fontFamily: 'Quicksand'),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () {
+                    if (_foodController.text.isNotEmpty &&
+                        _gramsController.text.isNotEmpty) {
+                      _addFoodItem(); // 음식 추가
+                    }
+                  },
+                  child: const Text('추가',
+                      style: TextStyle(fontFamily: 'Quicksand')),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: const Color.fromARGB(255, 173, 216, 230),
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            TextField(
-              controller: _gramsController,
-              decoration: InputDecoration(
-                hintText: '그램 입력',
-                hintStyle: const TextStyle(fontFamily: 'Quicksand'),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+            if (_foodItems.isNotEmpty) ...[
+              Expanded(
+                child: ListView.builder(
+                  itemCount: _foodItems.length,
+                  itemBuilder: (context, index) {
+                    final item = _foodItems[index];
+                    return Dismissible(
+                      key: Key(item['food']),
+                      direction: DismissDirection.endToStart,
+                      onDismissed: (direction) {
+                        _removeFoodItem(index);
+                      },
+                      background: Container(color: Colors.red),
+                      child: ListTile(
+                        title: Text('${item['food']}',
+                            style: const TextStyle(fontFamily: 'Quicksand')),
+                        subtitle: Text('그램: ${item['grams']}',
+                            style: const TextStyle(fontFamily: 'Quicksand')),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit),
+                              onPressed: () {
+                                _editFoodItem(index);
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () {
+                                _removeFoodItem(index);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
-              keyboardType: TextInputType.number,
-            ),
-            if (_foodItems.isNotEmpty) const SizedBox(height: 16),
-            if (_foodItems.isNotEmpty)
+              const SizedBox(height: 16),
               TextField(
                 controller: _commentController,
                 decoration: InputDecoration(
-                  hintText: '코멘트 입력',
+                  hintText: '전체 식단에 대한 코멘트 입력',
                   hintStyle: const TextStyle(fontFamily: 'Quicksand'),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
@@ -230,131 +291,19 @@ class FoodLogPageState extends State<FoodLogPage> {
                 maxLines: null,
                 textInputAction: TextInputAction.newline,
               ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    if (_foodController.text.isNotEmpty &&
-                        _gramsController.text.isNotEmpty &&
-                        (_foodItems.isEmpty ||
-                            _commentController.text.isNotEmpty)) {
-                      _addFoodItem(
-                          _foodController.text,
-                          _gramsController.text,
-                          _foodItems.isNotEmpty
-                              ? _commentController.text
-                              : null);
-                    }
-                  },
-                  child: const Text('추가하기',
-                      style: TextStyle(fontFamily: 'Quicksand')),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor:
-                        Color.fromARGB(255, 173, 216, 230), // 버튼 텍스트 색상
-                  ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _saveMealRecord, // 식단 기록
+                child: const Text('기록하기',
+                    style: TextStyle(fontFamily: 'Quicksand')),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: const Color.fromARGB(255, 173, 216, 230),
                 ),
-                const SizedBox(width: 16),
-                ElevatedButton(
-                  onPressed: _evaluateMeals,
-                  child: const Text('기록하기',
-                      style: TextStyle(fontFamily: 'Quicksand')),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor:
-                        Color.fromARGB(255, 173, 216, 230), // 버튼 텍스트 색상
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                _selectDate(context);
-              },
-              child: Text('날짜 선택: $_selectedDate',
-                  style: const TextStyle(fontFamily: 'Quicksand')),
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Color.fromARGB(255, 102, 102, 102),
-                backgroundColor: Color.fromARGB(255, 240, 240, 240), // 버튼 배경색
               ),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _mealLogs[_selectedMeal]?.length ?? 0,
-                itemBuilder: (context, index) {
-                  final item = _mealLogs[_selectedMeal]![index];
-                  return Dismissible(
-                    key: Key(item['time']),
-                    direction: DismissDirection.endToStart,
-                    onDismissed: (direction) {
-                      _removeFoodItem(_selectedMeal, index);
-                    },
-                    background: Container(color: Colors.red),
-                    child: ListTile(
-                      title: Text('${item['food']}',
-                          style: const TextStyle(fontFamily: 'Quicksand')),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (item['comment'] != null)
-                            Text(
-                                '코멘트: ${item['comment']} (그램: ${item['grams']})',
-                                style:
-                                    const TextStyle(fontFamily: 'Quicksand')),
-                          if (item['comment'] == null)
-                            Text('그램: ${item['grams']}',
-                                style:
-                                    const TextStyle(fontFamily: 'Quicksand')),
-                        ],
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit),
-                            onPressed: () {
-                              _editFoodItem(_selectedMeal, index);
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () {
-                              _removeFoodItem(_selectedMeal, index);
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
+            ],
           ],
         ),
-      ),
-    );
-  }
-
-  // 식사 선택 버튼을 생성하는 함수
-  Widget buildMealButton(String meal) {
-    return ChoiceChip(
-      label: Text(meal, style: const TextStyle(fontFamily: 'Quicksand')),
-      selected: _selectedMeal == meal,
-      onSelected: (selected) {
-        setState(() {
-          _selectedMeal = meal;
-        });
-      },
-      selectedColor: Color.fromARGB(255, 173, 216, 230), // 선택된 버튼 배경색
-      backgroundColor: Colors.white, // 선택되지 않은 버튼 배경색을 흰색으로 변경
-      labelStyle: TextStyle(
-        color: _selectedMeal == meal
-            ? Colors.white
-            : Color.fromARGB(255, 102, 102, 102), // 텍스트 색상
       ),
     );
   }
