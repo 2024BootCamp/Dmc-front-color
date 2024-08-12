@@ -8,7 +8,7 @@ class LoginPage extends StatelessWidget {
   final TextEditingController _passwordController = TextEditingController();
 
   final AuthService _authService =
-      AuthService('http://192.168.0.12:8081'); // Your base URL 제발 본인 컴퓨터에 맞게
+      AuthService('http://172.16.204.83:8081'); // Your base URL 제발 본인 컴퓨터에 맞게
 
   LoginPage({super.key});
 
@@ -42,8 +42,8 @@ class LoginPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset('assets/dmc_logo.png', height: 100),
-              const SizedBox(height: 16),
+              Image.asset('assets/dmc_logo.png', height: 120),
+              const SizedBox(height: 18),
               const Text(
                 'DMC',
                 style: TextStyle(
