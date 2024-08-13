@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'calendar_page.dart';
-import '../Screens/profile_page.dart';
+import '../Services/HealthService.dart';
 
 class HealthPage extends StatefulWidget {
   const HealthPage({super.key});
@@ -13,7 +12,8 @@ class HealthPage extends StatefulWidget {
 
 class _HealthPageState extends State<HealthPage> {
   String _selectedDate =
-      DateFormat('yyyy-MM-dd').format(DateTime.now()); // 선택된 날짜
+      DateFormat('yyyy-MM-dd').format(DateTime.now()); // Selected date
+
   final Map<String, Map<String, dynamic>> _healthData = {
     '혈압': {
       'high': 0,
@@ -30,9 +30,73 @@ class _HealthPageState extends State<HealthPage> {
       'value': 0.0,
       'data': <WeightData>[],
     },
-  }; // 건강 데이터
+  }; // Health data
 
-  // 날짜 선택 함수
+  @override
+  void initState() {
+    super.initState();
+    fetchHealthData();
+  }
+
+  // Fetch health data for the current user
+  Future<void> fetchHealthData() async {
+    try {
+      final healthData = await HealthService.fetchHealthData();
+      setState(() {
+        for (var item in healthData) {
+          final date = item['date']; // Assuming 'date' is returned as a string
+          _healthData['혈압']!['high'] = item['highBlood'] ?? 0;
+          _healthData['혈압']!['low'] = item['lowBlood'] ?? 0;
+          _healthData['혈압']!['data'].add(BloodPressureData(
+            date,
+            item['highBlood'] ?? 0,
+            item['lowBlood'] ?? 0,
+          ));
+          _healthData['혈당']!['fasting'] = item['emptySugar'] ?? 0;
+          _healthData['혈당']!['postMeal'] = item['fullSugar'] ?? 0;
+          _healthData['혈당']!['dataFasting'].add(BloodSugarData(
+            date,
+            (item['emptySugar'] ?? 0).toDouble(),
+          ));
+          _healthData['혈당']!['dataPostMeal'].add(BloodSugarData(
+            date,
+            (item['fullSugar'] ?? 0).toDouble(),
+          ));
+          _healthData['체중']!['value'] = (item['weigh'] ?? 0.0).toDouble();
+          _healthData['체중']!['data'].add(WeightData(
+            date,
+            (item['weigh'] ?? 0.0).toDouble(),
+          ));
+        }
+      });
+    } catch (e) {
+      throw Exception('Failed to load health data');
+    }
+  }
+
+  // Update health data for the current user
+  Future<void> updateHealthData() async {
+    final String formattedDate =
+        DateFormat('yyyy-MM-dd').format(DateTime.parse(_selectedDate));
+
+    final updatedData = {
+      'date': formattedDate,
+      'highBlood': _healthData['혈압']!['high'],
+      'lowBlood': _healthData['혈압']!['low'],
+      'emptySugar': _healthData['혈당']!['fasting'],
+      'fullSugar': _healthData['혈당']!['postMeal'],
+      'weigh': _healthData['체중']!['value'],
+    };
+
+    try {
+      await HealthService.updateHealthData(updatedData);
+      print("Health data updated successfully");
+    } catch (e) {
+      throw Exception('Failed to update health data');
+    }
+  }
+
+  // Date selection function
   Future<void> _selectDate(BuildContext context, Function onSave) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -48,7 +112,7 @@ class _HealthPageState extends State<HealthPage> {
     }
   }
 
-  // 혈압 입력 다이얼로그 표시
+  // Show blood pressure input dialog
   void _showBloodPressureDialog(BuildContext context) {
     final TextEditingController bloodPressureHighController =
         TextEditingController();
@@ -95,7 +159,7 @@ class _HealthPageState extends State<HealthPage> {
             TextButton(
               child:
                   const Text('저장', style: TextStyle(fontFamily: 'Quicksand')),
-              onPressed: () {
+              onPressed: () async {
                 setState(() {
                   _healthData['혈압']!['high'] =
                       int.parse(bloodPressureHighController.text);
@@ -108,6 +172,7 @@ class _HealthPageState extends State<HealthPage> {
                   ));
                 });
                 Navigator.of(context).pop();
+                await updateHealthData();
               },
             ),
           ],
@@ -116,7 +181,7 @@ class _HealthPageState extends State<HealthPage> {
     );
   }
 
-  // 혈당 입력 다이얼로그 표시
+  // Show blood sugar input dialog
   void _showBloodSugarDialog(BuildContext context) {
     final TextEditingController bloodSugarFastingController =
         TextEditingController();
@@ -163,7 +228,7 @@ class _HealthPageState extends State<HealthPage> {
             TextButton(
               child:
                   const Text('저장', style: TextStyle(fontFamily: 'Quicksand')),
-              onPressed: () {
+              onPressed: () async {
                 setState(() {
                   _healthData['혈당']!['fasting'] =
                       int.parse(bloodSugarFastingController.text);
@@ -179,6 +244,7 @@ class _HealthPageState extends State<HealthPage> {
                   ));
                 });
                 Navigator.of(context).pop();
+                await updateHealthData();
               },
             ),
           ],
@@ -187,7 +253,7 @@ class _HealthPageState extends State<HealthPage> {
     );
   }
 
-  // 체중 입력 다이얼로그 표시
+  // Show weight input dialog
   void _showWeightDialog(BuildContext context) {
     final TextEditingController weightController = TextEditingController();
 
@@ -218,7 +284,7 @@ class _HealthPageState extends State<HealthPage> {
             TextButton(
               child:
                   const Text('저장', style: TextStyle(fontFamily: 'Quicksand')),
-              onPressed: () {
+              onPressed: () async {
                 setState(() {
                   _healthData['체중']!['value'] =
                       double.parse(weightController.text);
@@ -228,6 +294,7 @@ class _HealthPageState extends State<HealthPage> {
                   ));
                 });
                 Navigator.of(context).pop();
+                await updateHealthData();
               },
             ),
           ],
@@ -271,21 +338,13 @@ class _HealthPageState extends State<HealthPage> {
           IconButton(
             icon: Icon(Icons.calendar_today, color: Colors.white), //아이콘 색상 변경
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const CalendarPage()), // 캘린더 페이지로 이동
-              );
+              // Navigate to calendar page
             },
           ),
           IconButton(
             icon: Icon(Icons.account_circle, color: Colors.white), // 아이콘 색상 변경
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const ProfilePage()), // 프로필 페이지로 이동
-              );
+              // Navigate to profile page
             },
           ),
         ],
@@ -296,7 +355,7 @@ class _HealthPageState extends State<HealthPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 날짜 및 시간 표시
+              // Display date and time
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -319,7 +378,7 @@ class _HealthPageState extends State<HealthPage> {
                 ],
               ),
               const SizedBox(height: 16),
-              // 혈압 카드
+              // Blood pressure card
               buildInfoCard(
                 title: '혈압',
                 onEdit: () {
@@ -364,7 +423,7 @@ class _HealthPageState extends State<HealthPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              // 체중 카드
+              // Weight card
               buildInfoCard(
                 title: '체중',
                 onEdit: () {
@@ -398,7 +457,7 @@ class _HealthPageState extends State<HealthPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              // 혈당 카드
+              // Blood sugar card
               buildInfoCard(
                 title: '혈당',
                 onEdit: () {
@@ -451,7 +510,7 @@ class _HealthPageState extends State<HealthPage> {
     );
   }
 
-  // 정보 카드 위젯 생성
+  // Info card widget
   Widget buildInfoCard({
     required String title,
     required Widget child,
@@ -468,7 +527,7 @@ class _HealthPageState extends State<HealthPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 카드 타이틀 및 수정 버튼
+            // Card title and edit button
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -493,26 +552,4 @@ class _HealthPageState extends State<HealthPage> {
       ),
     );
   }
-}
-
-// 체중 데이터 클래스
-class WeightData {
-  WeightData(this.date, this.weight);
-  final String date;
-  final double weight;
-}
-
-// 혈당 데이터 클래스
-class BloodSugarData {
-  BloodSugarData(this.date, this.value);
-  final String date;
-  final double value;
-}
-
-// 혈압 데이터 클래스
-class BloodPressureData {
-  BloodPressureData(this.date, this.high, this.low);
-  final String date;
-  final int high;
-  final int low;
 }

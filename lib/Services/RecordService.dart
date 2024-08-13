@@ -6,14 +6,14 @@ class RecordService {
   final String baseUrl = "http://192.168.56.1:8081"; // 백엔드 서버 URL
 
   // 사용자 인증 토큰을 이용해 식단 기록을 조회하는 함수
-  Future<List<dynamic>> fetchMealLogsByUserId() async {
+  Future<List<dynamic>> fetchMealLogsByDate(String date) async {
     final token = await AuthService.getToken(); // AuthService에서 토큰 가져오기
     if (token == null) {
       throw Exception('No token found');
     }
 
     final response = await http.get(
-      Uri.parse('$baseUrl/getAllRecordByUserId'),
+      Uri.parse('$baseUrl/getRecordsByDate?date=$date'),
       headers: {
         'Authorization': 'Bearer $token', // Bearer 토큰 사용
         'Content-Type': 'application/json; charset=UTF-8',
