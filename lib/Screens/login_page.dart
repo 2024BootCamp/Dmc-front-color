@@ -7,8 +7,7 @@ class LoginPage extends StatelessWidget {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  final AuthService _authService =
-      AuthService('http://172.16.204.83:8081'); // Your base URL 제발 본인 컴퓨터에 맞게
+  final AuthService _authService = AuthService(); // Your base URL 제발 본인 컴퓨터에 맞게
 
   LoginPage({super.key});
 
