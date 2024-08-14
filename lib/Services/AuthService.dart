@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../Model/SignupModel.dart';
 
 class AuthService {
-  final String baseUrl = "http://192.168.56.1:8081";
+  final String baseUrl = "http://172.16.227.191:8081";
 
   AuthService();
 

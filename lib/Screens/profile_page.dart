@@ -55,7 +55,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.56.1:8081/account/profile'),
+        Uri.parse('http://172.16.227.191:8081/account/profile'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -71,9 +71,9 @@ class _ProfilePageState extends State<ProfilePage> {
           birthday = data['birthday'] ?? '지정되지 않음';
           gender = data['gender'] ?? '지정되지 않음';
           if (gender == "F") {
-            gender = "남성";
-          } else {
             gender = "여성";
+          } else {
+            gender = "남성";
           }
           email = data['email'] ?? '지정되지 않음';
           _profileImagePath =
@@ -154,9 +154,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     radius: 40,
                     backgroundImage: _profileImagePath != null
                         ? (_profileImagePath!.startsWith('http')
-                                ? NetworkImage(_profileImagePath!)
-                                : FileImage(File(_profileImagePath!)))
-                            as ImageProvider
+                        ? NetworkImage(_profileImagePath!)
+                        : FileImage(File(_profileImagePath!)))
+                    as ImageProvider
                         : const AssetImage('assets/profile_image.png'),
                   ),
                   // 프로필 이미지 변경 아이콘
@@ -193,7 +193,7 @@ class _ProfilePageState extends State<ProfilePage> {
               }, // 매미매미 은혜은혜 바보 멍청이 못생긴 똥개 맨날 뚱뚱이라고 놀리고 시러! 미워!
               style: ElevatedButton.styleFrom(
                 backgroundColor:
-                    const Color.fromARGB(255, 173, 216, 230), // 앱바와 동일한 색상
+                const Color.fromARGB(255, 173, 216, 230), // 앱바와 동일한 색상
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),

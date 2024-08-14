@@ -10,7 +10,7 @@ class HealthService {
     }
 
     final response = await http.get(
-      Uri.parse('http://192.168.56.1:8081/healthStatus/user'),
+      Uri.parse('http://172.16.227.191:8081/healthStatus/user'),
       headers: {
         'Authorization': 'Bearer $token', // Bearer 토큰 사용
         'Content-Type': 'application/json; charset=UTF-8',
@@ -27,7 +27,7 @@ class HealthService {
   static Future<void> updateHealthData(Map<String, dynamic> updatedData) async {
     final token = await AuthService.getToken();
     final response = await http.post(
-      Uri.parse('http://192.168.56.1:8081/healthStatus/saveOrUpdate'),
+      Uri.parse('http://172.16.227.191:8081/healthStatus/saveOrUpdate'),
       headers: {
         'Authorization': 'Bearer $token', // Bearer 토큰 사용
         'Content-Type': 'application/json; charset=UTF-8',

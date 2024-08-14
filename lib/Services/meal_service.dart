@@ -8,7 +8,7 @@ Future<List<Map<String, dynamic>>> fetchRecommendedMealForToday() async {
   try {
     final token = await AuthService.getToken(); // AuthService에서 토큰 가져오기
     final response = await http.get(
-      Uri.parse('http://192.168.56.1:8081/recommend-meal'),
+      Uri.parse('http://localhost:8081/recommend-meal'),
       headers: {
         'Authorization': 'Bearer $token', // 헤더에 토큰 추가
       },
@@ -31,8 +31,7 @@ Future<List<Map<String, dynamic>>> fetchRecommendedMealForToday() async {
 
       return meals;
     } else {
-      throw Exception(
-          'Failed to load today\'s recommended meal, status code: ${response.statusCode}');
+      throw Exception('Failed to load today\'s recommended meal, status code: ${response.statusCode}');
     }
   } catch (e) {
     print('Error fetching today\'s recommended meal: $e');
@@ -55,8 +54,7 @@ Future<List<List<Map<String, dynamic>>>> fetchMealsByDate(DateTime date) async {
   try {
     final token = await AuthService.getToken(); // AuthService에서 토큰 가져오기
     final response = await http.get(
-      Uri.parse(
-          'http://192.168.56.1:8081/recommend/by-date?date=${DateFormat('yyyy-MM-dd').format(date)}'),
+      Uri.parse('http://localhost:8081/recommend/by-date?date=${DateFormat('yyyy-MM-dd').format(date)}'),
       headers: {
         'Authorization': 'Bearer $token', // 헤더에 토큰 추가
       },
@@ -82,8 +80,7 @@ Future<List<List<Map<String, dynamic>>>> fetchMealsByDate(DateTime date) async {
 
       return meals;
     } else {
-      throw Exception(
-          'Failed to load meals by date, status code: ${response.statusCode}');
+      throw Exception('Failed to load meals by date, status code: ${response.statusCode}');
     }
   } catch (e) {
     print('Error fetching meals by date: $e');

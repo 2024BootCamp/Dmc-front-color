@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'AuthService.dart';
 
 class ReportService {
-  final String baseUrl = "http://192.168.0.12:8081"; // 서버의 URL을 사용
+  final String baseUrl = "http://172.16.227.191:8081"; // 서버의 URL을 사용
 
   // recordId로 기록 조회
   Future<Map<String, dynamic>> fetchRecordById(int recordId) async {
