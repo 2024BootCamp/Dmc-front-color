@@ -8,7 +8,7 @@ Future<List<Map<String, dynamic>>> fetchRecommendedMealForToday() async {
   try {
     final token = await AuthService.getToken(); // AuthService에서 토큰 가져오기
     final response = await http.get(
-      Uri.parse('http://192.168.56.1:8081/recommend-meal'),
+      Uri.parse('http://18.220.105.215:8081/recommend-meal'),
       headers: {
         'Authorization': 'Bearer $token', // 헤더에 토큰 추가
       },
@@ -39,13 +39,23 @@ Future<List<Map<String, dynamic>>> fetchRecommendedMealForToday() async {
     rethrow;
   }
 }
+
 // 식단 호불호
 Future<bool> postLikeDislike(int recommendId, bool like) async {
-  var url = Uri.parse('http://your-server.com/api/like-meal/$recommendId');
-  var response = await http.post(url, body: {
-    'recommendId': recommendId.toString(),
-    'like': like.toString(),
-  });
+  var url = Uri.parse('http://18.220.105.215:8081/api/like-meal');
+  final token = await AuthService.getToken(); // AuthService에서 토큰 가져오기
+  if (token == null) {
+    throw Exception('No token found');
+  }
+  var response = await http.post(url,
+      headers: {
+        'Authorization': 'Bearer $token', // 헤더에 토큰 추가
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: json.encode({
+        'recommendId': recommendId.toString(),
+        'like': like,
+      }));
 
   return response.statusCode == 200;
 }
@@ -56,7 +66,7 @@ Future<List<List<Map<String, dynamic>>>> fetchMealsByDate(DateTime date) async {
     final token = await AuthService.getToken(); // AuthService에서 토큰 가져오기
     final response = await http.get(
       Uri.parse(
-          'http://192.168.56.1:8081/recommend/by-date?date=${DateFormat('yyyy-MM-dd').format(date)}'),
+          'http://18.220.105.215:8081/recommend/by-date?date=${DateFormat('yyyy-MM-dd').format(date)}'),
       headers: {
         'Authorization': 'Bearer $token', // 헤더에 토큰 추가
       },

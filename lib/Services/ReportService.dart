@@ -3,11 +3,11 @@ import 'dart:convert';
 import 'AuthService.dart';
 
 class ReportService {
-  final String baseUrl = "http://192.168.0.12:8081"; // 서버의 URL을 사용
+  final String baseUrl = "http://18.220.105.215:8081"; // 서버의 URL을 사용
 
   // recordId로 기록 조회
   Future<Map<String, dynamic>> fetchRecordById(int recordId) async {
-    final response = await http.get(Uri.parse('$baseUrl/your-endpoint/$recordId'));
+    final response = await http.get(Uri.parse('$baseUrl/getDetail/$recordId'));
 
     if (response.statusCode == 200) {
       return json.decode(response.body);
@@ -49,13 +49,15 @@ class ReportService {
         throw Exception('Failed to parse the score');
       }
     } else {
-      print('Error evaluating record: ${response.statusCode} - ${response.body}');
+      print(
+          'Error evaluating record: ${response.statusCode} - ${response.body}');
       throw Exception('Failed to evaluate record');
     }
   }
 
   // 새로운 평가를 서버로 전송
-  Future<void> sendRating(int recordId, double rating, double starRating) async {
+  Future<void> sendRating(
+      int recordId, double rating, double starRating) async {
     final response = await http.post(
       Uri.parse('$baseUrl/rating'),
       headers: {'Content-Type': 'application/json'},

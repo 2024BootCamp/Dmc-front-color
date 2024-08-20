@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../Model/SignupModel.dart';
+import 'package:flutter_application_1/Model/SignupModel.dart';
 
 class AuthService {
-  final String baseUrl = "http://192.168.56.1:8081";
+  final String baseUrl = "http://18.220.105.215:8081";
 
   AuthService();
 

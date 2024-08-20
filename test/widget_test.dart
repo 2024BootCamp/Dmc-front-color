@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_application_1/Screens/main.dart'; // 여기에 실제 파일 경로를 맞추세요.
+import 'package:flutter_application_1/main.dart'; // 여기에 실제 파일 경로를 맞추세요.
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {

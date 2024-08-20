@@ -55,7 +55,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.56.1:8081/account/profile'),
+        Uri.parse('http://18.220.105.215:8081/account/profile'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -71,9 +71,9 @@ class _ProfilePageState extends State<ProfilePage> {
           birthday = data['birthday'] ?? '지정되지 않음';
           gender = data['gender'] ?? '지정되지 않음';
           if (gender == "F") {
-            gender = "남성";
-          } else {
             gender = "여성";
+          } else {
+            gender = "남성";
           }
           email = data['email'] ?? '지정되지 않음';
           _profileImagePath =

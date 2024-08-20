@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../Services/AuthService.dart'; // AuthService를 import합니다.
-import '../Screens/login_page.dart';
-import '../Screens/home_page.dart';
+import 'Services/AuthService.dart'; // AuthService를 import
+import 'Screens/login_page.dart';
+import 'Screens/home_page.dart';
 
+// RecordService, signup2, main, login, ReportService
 // 메인 함수, 애플리케이션 진입점
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // 비동기 초기화
@@ -26,7 +27,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Your App Title',
+      debugShowCheckedModeBanner: false,
+      title: 'DMC',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         bottomNavigationBarTheme: BottomNavigationBarThemeData(

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter_application_1/Services/AuthService.dart';
 
 class RecordService {
-  final String baseUrl = "http://192.168.56.1:8081"; // 백엔드 서버 URL
+  final String baseUrl = "http://18.220.105.215:8081"; // 백엔드 서버 URL
 
   // 사용자 인증 토큰을 이용해 식단 기록을 조회하는 함수
   Future<List<dynamic>> fetchMealLogsByDate(String date) async {

@@ -27,7 +27,8 @@ class _ReportPageState extends State<ReportPage> {
 
   Future<void> _fetchMealLogsByDate() async {
     try {
-      List<dynamic> logs = await _recordService.fetchMealLogsByDate(_selectedDate);
+      List<dynamic> logs =
+          await _recordService.fetchMealLogsByDate(_selectedDate);
       setState(() {
         _mealLogs = logs.cast<Map<String, dynamic>>();
       });
@@ -54,7 +55,8 @@ class _ReportPageState extends State<ReportPage> {
     }
   }
 
-  Future<void> _evaluateAppRating(int recordId, Function(double) onRatingReceived) async {
+  Future<void> _evaluateAppRating(
+      int recordId, Function(double) onRatingReceived) async {
     try {
       double score = await _reportService.evaluateRecord(recordId);
       onRatingReceived(score);
@@ -114,14 +116,14 @@ class _ReportPageState extends State<ReportPage> {
               child: _mealLogs.isEmpty
                   ? const Center(child: Text('해당 날짜에 기록된 식단이 없습니다.'))
                   : ListView.builder(
-                itemCount: _mealLogs.length,
-                itemBuilder: (context, index) {
-                  return MealDetailCard(
-                    mealLog: _mealLogs[index],
-                    evaluateAppRating: _evaluateAppRating,
-                  );
-                },
-              ),
+                      itemCount: _mealLogs.length,
+                      itemBuilder: (context, index) {
+                        return MealDetailCard(
+                          mealLog: _mealLogs[index],
+                          evaluateAppRating: _evaluateAppRating,
+                        );
+                      },
+                    ),
             ),
           ],
         ),
@@ -149,7 +151,8 @@ class _MealDetailCardState extends State<MealDetailCard> {
 
   @override
   Widget build(BuildContext context) {
-    final listFoods = (widget.mealLog['listFoods'] as Map?)?.cast<String, dynamic>() ?? {};
+    final listFoods =
+        (widget.mealLog['listFoods'] as Map?)?.cast<String, dynamic>() ?? {};
     final content = widget.mealLog['content'] ?? '코멘트 없음';
 
     return Card(
@@ -182,14 +185,16 @@ class _MealDetailCardState extends State<MealDetailCard> {
                 const Text('식단 평가 점수'),
                 ElevatedButton(
                   onPressed: () {
-                    widget.evaluateAppRating(widget.mealLog['recordId'], (score) {
+                    widget.evaluateAppRating(widget.mealLog['recordId'],
+                        (score) {
                       setState(() {
                         _appRating = score == null ? 0 : score; // null이면 0점
                       });
                     });
                   },
                   child: const Text('평가하기',
-                      style: TextStyle(fontFamily: 'Quicksand', color: Colors.white)),
+                      style: TextStyle(
+                          fontFamily: 'Quicksand', color: Colors.white)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 173, 216, 230),
                   ),
@@ -201,7 +206,7 @@ class _MealDetailCardState extends State<MealDetailCard> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  '평점 (5점 만점): ${_appRating!.toStringAsFixed(2)}',
+                  '평점 (100점 만점): ${_appRating!.toStringAsFixed(2)}',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,

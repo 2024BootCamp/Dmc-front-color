@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../Services/HealthService.dart';
+import '../Screens/profile_page.dart';
 
 class HealthPage extends StatefulWidget {
   const HealthPage({super.key});
@@ -192,10 +193,8 @@ class _HealthPageState extends State<HealthPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(
-            '$_selectedDate 혈당 기록',
-            style: const TextStyle(fontFamily: 'Quicksand'),
-          ),
+          title: Text('$_selectedDate 혈당 기록',
+              style: const TextStyle(fontFamily: 'Quicksand')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -261,10 +260,8 @@ class _HealthPageState extends State<HealthPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(
-            '$_selectedDate 체중 기록',
-            style: const TextStyle(fontFamily: 'Quicksand'),
-          ),
+          title: Text('$_selectedDate 체중 기록',
+              style: const TextStyle(fontFamily: 'Quicksand')),
           content: TextField(
             controller: weightController,
             decoration: const InputDecoration(
@@ -336,15 +333,20 @@ class _HealthPageState extends State<HealthPage> {
         backgroundColor: const Color.fromARGB(255, 173, 216, 230),
         actions: [
           IconButton(
-            icon: Icon(Icons.calendar_today, color: Colors.white), //아이콘 색상 변경
-            onPressed: () {
-              // Navigate to calendar page
+            icon: const Icon(Icons.calendar_today, color: Colors.white),
+            onPressed: () async {
+              await _selectDate(context, () async {
+                await fetchHealthData(); // Fetch health data after selecting date
+              });
             },
           ),
           IconButton(
-            icon: Icon(Icons.account_circle, color: Colors.white), // 아이콘 색상 변경
+            icon: const Icon(Icons.account_circle, color: Colors.white),
             onPressed: () {
-              // Navigate to profile page
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProfilePage()),
+              );
             },
           ),
         ],
